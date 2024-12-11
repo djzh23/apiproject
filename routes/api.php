@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\SuperAdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,3 +19,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/profile', [AuthController::class, 'getProfile']);
 });
 
+//Route::put('approve/{userId}', SuperAdminController::class.'@approve')->middleware('superadmin', 'auth:sanctum');
+//Route::put('disapprove/{userId}', SuperAdminController::class.'@disapprove')->middleware('superadmin', 'auth:sanctum');
+
+// super admin routes
+Route::middleware(['auth:sanctum', 'superadmin'])->group(function () {
+    Route::put('/approve/{userId}', [SuperAdminController::class, 'approve']);
+    Route::put('/disapprove/{userId}', [SuperAdminController::class, 'disapprove']);
+    Route::get('/getUsers', [SuperAdminController::class, 'getAllUsers']);
+
+});

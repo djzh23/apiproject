@@ -14,11 +14,21 @@ return [
         'no_changes' => 'Keine Änderungen vorgenommen.',
         'update_error' => 'Fehler beim Aktualisieren der Benutzerinformationen.',
     ],
+    'superadmin' => [
+        'no_permission' => 'Keine Berechtigung.',
+        'approved' => 'Benutzer wurde erfolgreich aktiviert.',
+        'failure_approve' => 'Benutzer konnte nicht aktiviert werden.',
+        'disapproved' => 'Benutzer wurde erfolgreich deaktiviert.',
+        'failure_disapprove' => 'Benutzer konnte nicht deaktiviert werden.',
+        'users_found' => 'Benutzer gefunden.',
+        'no_users_found' => 'Keine Benutzer gefunden.',
+    ],
     'auth' => [
         'invalid_password' => 'Ungültiges Passwort.',
         'invalid_credentials' => 'Ungültige Anmeldedaten.',
         'logout_success' => 'Erfolgreich abgemeldet.',
         'unauthorized' => 'Nicht autorisiert.',
+        'superadmin_required' => 'Superadmin-Rechte erforderlich.',
     ],
     'validation' => [
         'password' => [
@@ -38,6 +48,7 @@ return [
         'registration_failed' => 'Registrierung konnte nicht abgeschlossen werden.',
         'general' => 'Ein Fehler ist aufgetreten.',
         'server' => 'Serverfehler aufgetreten.',
+        'invalid_request' => 'Ungültige Anfrage.',
         // weitere Fehlermeldungen...
     ],
 ];
