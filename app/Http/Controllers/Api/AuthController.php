@@ -83,9 +83,9 @@ class AuthController extends BaseController
                 'approved' => false, // Not approved initially
             ]);
 
-            return $this->success(__('messages.user.registered'), $newUser);
+            return $this->success(trans('messages.user.registered'), $newUser);
         } catch (\Exception $e) {
-            return $this->error(__('messages.errors.registration_failed'), null);
+            return $this->error(trans('messages.errors.registration_failed'), null);
         }
     }
     function register_(Request $request): JsonResponse
