@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BillingController;
 use App\Http\Controllers\Api\SuperAdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,8 +20,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/profile', [AuthController::class, 'getProfile']);
 });
 
-//Route::put('approve/{userId}', SuperAdminController::class.'@approve')->middleware('superadmin', 'auth:sanctum');
-//Route::put('disapprove/{userId}', SuperAdminController::class.'@disapprove')->middleware('superadmin', 'auth:sanctum');
 
 // super admin routes
 Route::middleware(['auth:sanctum', 'superadmin'])->group(function () {
@@ -29,3 +28,21 @@ Route::middleware(['auth:sanctum', 'superadmin'])->group(function () {
     Route::get('/getUsers', [SuperAdminController::class, 'getAllUsers']);
 
 });
+
+Route::get('billings/billings-pdfs', [BillingController::class, 'listOfBillsPdfs'])->middleware('auth:sanctum');
+//// Billings API routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/billings/createbill', [BillingController::class, 'store']);
+    Route::post('/billings/preview', [BillingController::class, 'preview']);
+    Route::post('/billings/{id}/pdf', [BillingController::class, 'storeBillPdf']);
+    Route::get('/billings', [BillingController::class, 'getAllUserBillings']);
+    Route::get('/billings/{month}', [BillingController::class, 'getBillsByMonth']);
+    Route::get('/billings/download/{filename}', [BillingController::class, 'download'])
+        ->name('pdf.download')
+        ->middleware('throttle:60,1', 'auth:sanctum');
+});
+
+//Route::get('/billings/download/{filename}', [BillingController::class, 'download'])
+//    ->name('pdf.download')
+//    ->middleware('throttle:60,1', 'auth:sanctum');
+

@@ -49,6 +49,46 @@ return [
         'general' => 'Ein Fehler ist aufgetreten.',
         'server' => 'Serverfehler aufgetreten.',
         'invalid_request' => 'Ungültige Anfrage.',
-        // weitere Fehlermeldungen...
+
+    ],
+    'billing' => [
+        'preview' => [
+            'success' => 'Preview war erfolgreich.',
+            'failed' => 'Preview war nicht erfolgreich, bitte prüfen Sie nochmal die Eingaben.',
+            'validation_failed' => 'Die Validierung hat fehlgeschlagen, bitte die Eingabe prüfen .',
+            'invalid' => 'Ungültige Rechnungsnummer oder Rechnungsnummer ist bereits vergeben.'
+        ],
+        'fetch' => [
+            'success' => 'Rechnung erfolgreich abgerufen.',
+            'failed' => 'Rechnung konnte nicht abgerufen werden.',
+            'not_found' => 'Keine Rechnung gefunden.',
+        ],
+        'create' => [
+            'success' => 'Rechnung erfolgreich erstellt.',
+            'failed' => 'Rechnung konnte nicht erstellt werden.',
+        ],
+        'pdf' => [
+            'upload' => [
+                'success' => 'PDF erfolgreich hochgeladen.',
+                'failed' => 'PDF konnte nicht hochgeladen werden.',
+            ],
+            'download' => [
+                'success' => 'PDF erfolgreich heruntergeladen.',
+                'failed' => 'PDF konnte nicht heruntergeladen werden.',
+            ],
+            'month_pagination' => [
+                'success' => 'Rechnungen mit PDFs erfolgreich für diesen Monat paginiert.',
+                'failed' => 'Keine Rechnungen für den ausgewählten Monat konnten paginiert werden.',
+            ],
+            'list' => [
+                'success' => 'PDF-Liste erfolgreich abgerufen.',
+                'failed' => 'PDF-Liste konnte nicht abgerufen werden.',
+            ],
+            'not_found' => 'PDF wurde nicht gefunden.',
+        ],
+        'errors' => [
+            'general' => 'Ein Fehler ist aufgetreten.',
+            'unauthorized' => 'Nicht autorisierter Zugriff.',
+        ],
     ],
 ];

@@ -410,4 +410,10 @@ class AuthController extends BaseController
             'user' => $request->user()
         ]);
     }
+
+
+
+
+
+
 }
