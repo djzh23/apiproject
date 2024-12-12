@@ -96,6 +96,7 @@ return [
             ],
             'month_pagination' => [
                 'success' => 'Rechnungen mit PDFs erfolgreich für diesen Monat paginiert.',
+                'empty' => 'Keine Rechnungen für den ausgewählten Monat gefunden.',
                 'failed' => 'Keine Rechnungen für den ausgewählten Monat konnten paginiert werden.',
             ],
             'list' => [
@@ -125,6 +126,7 @@ return [
             'validation_failed' => 'Die Validierung hat fehlgeschlagen, bitte die Eingabe prüfen .',
             'by_team' => [
                 'success' => 'Einsätze wurden erfolgreich nach Team geladen.',
+                'empty' => 'Keine Einsätze für dieses Team gefunden.',
                 'failed' => 'Problem beim Laden von Einsätze nach Team .',
             ],
         ],
