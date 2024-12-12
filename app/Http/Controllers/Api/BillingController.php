@@ -131,15 +131,13 @@ class BillingController extends BaseController
         $billingsData = $billings->map(function ($billing) {
             return [
                 'id' => $billing->id,
-                'data' => [
-                    'billing_number' => $billing->billing_number,
-                    'date' => $billing->date,
-                    'team' => $billing->team,
-                    'month' => $billing->month,
-                    'somme_all' => $billing->somme_all,
-                    'isvorort' => $billing->isvorort,
-                    'pdf_file' => $billing->pdf_file,
-                    ]
+                'billing_number' => $billing->billing_number,
+                'date' => $billing->date,
+                'team' => $billing->team,
+                'month' => $billing->month,
+                'somme_all' => $billing->somme_all,
+                'isvorort' => $billing->isvorort,
+                'pdf_file' => $billing->pdf_file,
                 ];
         });
         if($billingsData->isEmpty()){
@@ -177,15 +175,13 @@ class BillingController extends BaseController
             $billingsData = $billings->map(function ($billing) {
                 return [
                     'id' => $billing->id,
-                    'data' => [
-                        'billing_number' => $billing->billing_number,
-                        'date' => $billing->date,
-                        'team' => $billing->team,
-                        'month' => $billing->month,
-                        'somme_all' => $billing->somme_all,
-                        'isvorort' => $billing->isvorort,
-                        'pdf_file' => $billing->pdf_file,
-                    ]
+                    'billing_number' => $billing->billing_number,
+                    'date' => $billing->date,
+                    'team' => $billing->team,
+                    'month' => $billing->month,
+                    'somme_all' => $billing->somme_all,
+                    'isvorort' => $billing->isvorort,
+                    'pdf_file' => $billing->pdf_file,
                 ];
             });
 

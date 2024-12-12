@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -324,13 +325,10 @@ class WorkController
             $worksData = $works->map(function ($works) {
                 return [
                     'id' => $works->id,
-                    'data' => [
-                        'id' => $works->id,
-                        'date' => $works->date,
-                        'team' => $works->team,
-                        'creator_name' => $works->creator ? $works->creator->firstname . ' ' . $works->creator->lastname : null,
-                        'pdf_file' => $works->pdf_file,
-                    ]
+                    'date' => $works->date,
+                    'team' => $works->team,
+                    'creator_name' => $works->creator ? $works->creator->firstname . ' ' . $works->creator->lastname : null,
+                    'pdf_file' => $works->pdf_file,
                 ];
             });
 
@@ -389,4 +387,16 @@ class WorkController
             return $this->error(__('messages.work.count.standing.failed'), null);
         }
     }
+
+//    public function download($filename)
+//    {
+//        $path = 'pdfs/' . $filename;
+//
+//        if (!Storage::disk('local')->exists($path)) {
+//            return response()->json(['error' => 'file not found'], 404);
+//        }
+//
+//        return response()->download(storage_path('app/' . $path), $filename);
+//    }
+
 }
