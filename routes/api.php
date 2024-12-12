@@ -55,6 +55,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/works/count/created', [WorkController::class, 'GetNumberOfWorks']);
     Route::get('/works/count/standing', [WorkController::class, 'GetNumberOfStandingWorks']);
+
+//    Route::get('/works/download/{filename}', [WorkController::class, 'download'])
+//        ->name('pdf.download')
+//        ->middleware('throttle:60,1');
 });
 
 //Route::get('/countbillscreated', [BillingController::class, 'getNumberOfBills'])->middleware('auth:sanctum');
