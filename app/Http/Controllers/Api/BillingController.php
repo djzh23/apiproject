@@ -124,8 +124,6 @@ class BillingController extends BaseController
         // Get only the Works that belong to the authenticated user
         $perpage = 10;
         $billings = Billing::where('user_id', $userId)
-//            ->with('ageGroups') // Eager load the ageGroups relationship
-//            ->orderByRaw("CASE WHEN status = 'standing' THEN 0 ELSE 1 END, updated_at DESC")
             ->paginate($perpage); // Change '10' to however many works per page you want
 
 
@@ -162,72 +160,57 @@ class BillingController extends BaseController
             'path' => $billings->path(),
         ];
         return $this->success(__('messages.billing.fetch.success'), $billingsData,$pagination);
-//        return response()->json([
-//            'success' => true,
-//            'message' => 'Works fetched successfully',
-//            'data' => $billingsData,
-//            'pagination' => [
-//                'total' => $billings->total(),
-//                "per_page"=> $perpage,
-//                'current_page' => $billings->currentPage(),
-//                'last_page' => $billings->lastPage(),
-//                'from' => $billings->firstItem(),
-//                'to' => $billings->lastItem(),
-//                'first_page_url' => $billings->url(1),
-//                'last_page_url' => $billings->url($billings->lastPage()),
-//                'next_page_url' => $billings->nextPageUrl(),
-//                'prev_page_url' => $billings->previousPageUrl(),
-//                'path' => $billings->path(),
-//            ],
-//        ], 200);
 
     }
     public function getBillsByMonth(Request $request, $month)
     {
-        // Get only the Bill that belong to the authenticated user
-        $perpage = 10;
-        $billings = Billing::where('user_id', $request->user()->id)
-            ->where('month', $month)
-            ->select(['id', 'billing_number', 'date', 'month', 'team', 'somme_all', 'isvorort', 'pdf_file'])
-            ->paginate($perpage);
+        try{
+            // Get only the Bill that belong to the authenticated user
+            $perpage = 10;
+            $billings = Billing::where('user_id', $request->user()->id)
+                ->where('month', $month)
+                ->select(['id', 'billing_number', 'date', 'month', 'team', 'somme_all', 'isvorort', 'pdf_file'])
+                ->paginate($perpage);
 
 
-        // Transform the data to make it more readable
-        $billingsData = $billings->map(function ($billing) {
-            return [
-                'id' => $billing->id,
-                'data' => [
-                    'billing_number' => $billing->billing_number,
-                    'date' => $billing->date,
-                    'team' => $billing->team,
-                    'month' => $billing->month,
-                    'somme_all' => $billing->somme_all,
-                    'isvorort' => $billing->isvorort,
-                    'pdf_file' => $billing->pdf_file,
-                ]
-            ];
-        });
+            // Transform the data to make it more readable
+            $billingsData = $billings->map(function ($billing) {
+                return [
+                    'id' => $billing->id,
+                    'data' => [
+                        'billing_number' => $billing->billing_number,
+                        'date' => $billing->date,
+                        'team' => $billing->team,
+                        'month' => $billing->month,
+                        'somme_all' => $billing->somme_all,
+                        'isvorort' => $billing->isvorort,
+                        'pdf_file' => $billing->pdf_file,
+                    ]
+                ];
+            });
 
+            if ($billingsData != null && $billingsData->count() > 0){
+                $pagination = [
+                    'total' => $billings->total(),
+                    "per_page"=> $perpage,
+                    'current_page' => $billings->currentPage(),
+                    'last_page' => $billings->lastPage(),
+                    'from' => $billings->firstItem(),
+                    'to' => $billings->lastItem(),
+                    'first_page_url' => $billings->url(1),
+                    'last_page_url' => $billings->url($billings->lastPage()),
+                    'next_page_url' => $billings->nextPageUrl(),
+                    'prev_page_url' => $billings->previousPageUrl(),
+                    'path' => $billings->path(),
+                ];
+                return $this->success(__('messages.billing.pdf.month_pagination.success'), $billingsData,$pagination);
 
-        if ($billingsData != null && $billingsData->count() > 0){
-            $pagination = [
-                'total' => $billings->total(),
-                "per_page"=> $perpage,
-                'current_page' => $billings->currentPage(),
-                'last_page' => $billings->lastPage(),
-                'from' => $billings->firstItem(),
-                'to' => $billings->lastItem(),
-                'first_page_url' => $billings->url(1),
-                'last_page_url' => $billings->url($billings->lastPage()),
-                'next_page_url' => $billings->nextPageUrl(),
-                'prev_page_url' => $billings->previousPageUrl(),
-                'path' => $billings->path(),
-            ];
-            return $this->success(__('messages.billing.pdf.month_pagination.success'), $billingsData,$pagination);
-
+            }
+            return $this->success(trans('messages.billing.pdf.month_pagination.empty'), null);
         }
-
-        return $this->error(trans('messages.billing.pdf.month_pagination.failed'), null);
+        catch (\Exception $e){
+            return $this->error(trans('messages.billing.pdf.month_pagination.failed'), null);
+        }
 
     }
     public function download($filename)

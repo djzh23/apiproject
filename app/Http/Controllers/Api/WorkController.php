@@ -16,6 +16,7 @@ use Illuminate\Validation\ValidationException;
 class WorkController
 {
     use ApiResponses;
+
     public function creatework(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -53,7 +54,7 @@ class WorkController
 
     public function getAllWorks(): JsonResponse
     {
-        try{
+        try {
             $userId = auth()->id();
 
             // Get only the Works that belong to the authenticated user and filtered by status
@@ -101,7 +102,7 @@ class WorkController
 
             $pagination = [
                 'total' => $works->total(),
-                "per_page"=> $perpage,
+                "per_page" => $perpage,
                 'current_page' => $works->currentPage(),
                 'last_page' => $works->lastPage(),
                 'from' => $works->firstItem(),
@@ -141,7 +142,6 @@ class WorkController
             'plan' => 'sometimes|required|string',
 
 
-
             'reflection' => 'sometimes|required|string',
 
             'defect' => 'sometimes|nullable|string',
@@ -151,7 +151,6 @@ class WorkController
 
             'notes' => 'sometimes|nullable|string',
             'wishes' => 'sometimes|nullable|string',
-
 
 
             'end_work' => 'sometimes|required|date_format:H:i',
@@ -207,6 +206,7 @@ class WorkController
 
         return $this->success(trans('messages.work.update.success'), $work);
     }
+
     public function storePdf(Request $request, $id): JsonResponse
     {
         // Find the work by its id
@@ -236,9 +236,10 @@ class WorkController
 
         return $this->success(trans('messages.work.pdf.upload.success'), $work);
     }
+
     public function getAdminAllWorks(Request $request)
     {
-        try{
+        try {
             // Get filter parameters from the request
             $team = $request->input('team');
 
@@ -301,27 +302,55 @@ class WorkController
                 'path' => $works->path(),
             ];
             return $this->success(trans('messages.work.fetch.success'), $worksData, $pagination);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return $this->error(__('messages.work.fetch.failed'), null);
         }
 
     }
-    public function getWorksByTeam($team)
+
+    public function getWorksByTeam(Request $request, $team)
     {
-        try{
-            // Assuming there is a 'team' column in the 'works' table
+        try {
+            // Get only the Bill that belong to the authenticated user
+            $perpage = 10;
             $works = Work::with('ageGroups')
                 ->where('team', $team)
                 ->whereNotNull('pdf_file')
                 ->where('status', 'complete')
                 ->orderBy('created_at', 'desc')
-                ->get();
+                ->paginate($perpage);
+            // Assuming there is a 'team' column in the 'works' table
+//            $works = Work::with('ageGroups')
+//                ->where('team', $team)
+//                ->whereNotNull('pdf_file')
+//                ->where('status', 'complete')
+//                ->orderBy('created_at', 'desc')
+//                ->get();
 
-            return $this->success(trans('messages.work.fetch.by_team.success'), $works);
-        }
-        catch (\Exception $e) {
+
+            if ($works != null && $works->count() > 0) {
+                $pagination = [
+                    'total' => $works->total(),
+                    "per_page" => $perpage,
+                    'current_page' => $works->currentPage(),
+                    'last_page' => $works->lastPage(),
+                    'from' => $works->firstItem(),
+                    'to' => $works->lastItem(),
+                    'first_page_url' => $works->url(1),
+                    'last_page_url' => $works->url($works->lastPage()),
+                    'next_page_url' => $works->nextPageUrl(),
+                    'prev_page_url' => $works->previousPageUrl(),
+                    'path' => $works->path(),
+                ];
+                return $this->success(trans('messages.work.fetch.by_team.success'), $works, $pagination);
+            }
+            else{
+                return $this->success(trans('messages.work.fetch.by_team.empty'), $works);
+            }
+
+        } catch (\Exception $e) {
             return $this->error(__('messages.work.fetch.by_team.failed'), null);
+//            return $this->error($e->getMessage(), null);
         }
 
 
