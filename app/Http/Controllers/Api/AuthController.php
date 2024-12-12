@@ -146,45 +146,49 @@ class AuthController extends BaseController
     public function login(Request $request): JsonResponse
     {
         try {
-            $credentials = $request->validate([
-                'email' => ['required', new StrictEmailRule, 'max:255'],
-                'password' => ['required', 'string', 'min:8'],
+
+            $credentials = Validator::make($request->all(), [
+                'email' => ['required', new StrictEmailRule],
+                'password' => ['required', new PasswordRule],
             ]);
+
+            if ($credentials->fails()) {
+                // Concatenate all error messages into a single string
+                $errorMessages = $credentials->errors()->all(); // Get all error messages as an array
+                $errorString = implode(' ', $errorMessages); // Join them into a single string
+
+                return $this->error($errorString, null); // Return the concatenated string
+            }
 
             // Validate user existence
             if (!User::where('email', $request->input('email'))->exists()) {
 //                return $this->error('Invalid email', null);
-                return $this->error(__('messages.errors.invalid_email'), null);
+                return $this->error(__('messages.validation.email.not_found'), null);
             }
 
             // Retrieve the user by email
             $user = User::where('email', $request->input('email'))->first();
 
-            // Check if user exists
-            if (!$user) {
-//                return $this->error('User not found', null);
-                return $this->error(__('messages.user.not_found'), null);
-            }
 
+            // Verify the password
+            if (!Hash::check($request->input('password'), $user->password)) {
+                return $this->error(__('messages.auth.password.failed'), null);
+
+            }
             // Check if user is approved
             if (!$user->approved) {
-//                return $this->error('User not approved yet!', null);
                 return $this->error(__('messages.user.not_approved'), null);
             }
 
             // Check if the user's role is 'NoRole'
             if ($user->role_id == 5) {
-//                return $this->error('User role not assigned. Please wait for approval.', null);
                 return $this->error(__('messages.user.no_role'), null);
             }
 
-            // Verify the password
-            if (!Hash::check($request->input('password'), $user->password)) {
-                return $this->error('Invalid password.', null);
-            }
+
 
             // Attempt to log in the user
-            if (Auth::attempt($credentials)) {
+            if (Auth::attempt($request->only('email', 'password'))) {
                 $user = Auth::user(); // Get the authenticated user
                 $roleId = $user->role_id; // Fetch the user's role_id
                 $token = $user->createToken("auth_token")->plainTextToken; // Create API token
@@ -198,28 +202,23 @@ class AuthController extends BaseController
                     5 => 'NoRole'
                 ];
 
-                $roleName = $roles[$roleId] ?? 'Unknown';
-                return $this->success(__('messages.success.saved'),  [
+//                $roleName = $roles[$roleId] ?? 'Unknown';
+                $roleName = $roles[$roleId];
+                return $this->success(__('messages.auth.login.success'),  [
                     'user' =>  $user->toArray(),
                     'role' => $roleName,
                     'token' => $token
                 ]);
-//                return $this->success('Data saved successfully',  [
-//                    'user' =>  $user->toArray(),
-//                    'role' => $roleName,
-//                    'token' => $token
-//                ]);
             }
             else {
-//                return $this->error('Invalid credentials.', null);
                 return $this->error(__('messages.auth.invalid_credentials'), null);
             }
 
         }
         catch (\Exception $e) {
-            return $this->error(__('messages.validation.password.server_error'), null);
-//            return $this->error("The password field must be at least 8 characters or something is off on the server side. Pleas try again later! : $e",
-//                                    null);
+            Log::error("Error logging in user: $e");
+            return $this->error(__('messages.server_error'), null);
+
         }
     }
     public function logout(Request $request): JsonResponse

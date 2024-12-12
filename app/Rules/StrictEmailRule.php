@@ -18,12 +18,12 @@ class StrictEmailRule implements ValidationRule
         // Define a stricter regex pattern for email validation
         $pattern = '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/';
 
+        if (strlen($value) > 255) {
+            $fail(__('messages.validation.email.max_length'));
+        }
         // Check if the email matches the pattern
-        if (!preg_match($pattern, $value)) {
-            $attribute_de = AttributeHelper::get($attribute);
-            $fail(
-                str_replace(':attribute_de', $attribute_de, 'Die :attribute_de muss ein gültiger email Adresse sein.')
-            );
+        if (!str_contains($value, '@') || !preg_match($pattern, $value) ) {
+            $fail( __('messages.validation.email.invalid'));
         }
     }
 }

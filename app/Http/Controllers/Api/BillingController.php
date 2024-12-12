@@ -20,7 +20,6 @@ class BillingController extends BaseController
     {
         $this->initializeDirectories();
     }
-
     public function initializeDirectories()
     {
         // Create a directory in storage/app
@@ -29,7 +28,6 @@ class BillingController extends BaseController
         // Create a directory in public (which is linked to storage/app/public)
         Storage::disk('public')->makeDirectory('bills-public-directory');
     }
-
     public function store(Request $request): JsonResponse
     {
         try {
@@ -241,7 +239,6 @@ class BillingController extends BaseController
 
         return Storage::disk('public')->download($path);
     }
-
     public function listOfBillsPdfs(Request $request)
     {
         $userId = $request->user()->id;

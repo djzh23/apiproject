@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\User;
+use App\Models\Work;
 use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -81,4 +82,5 @@ class SuperAdminController
 //            return response()->json(['success' => false, 'message' => 'User is not approved', 'data' => null], 400);
         }
     }
+
 }
