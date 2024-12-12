@@ -16,9 +16,9 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 // Protected API routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/user', [AuthController::class, 'user']);
-    Route::put('/updateProfile', [AuthController::class, 'update']);
-    Route::get('/user/profile', [AuthController::class, 'getProfile']);
+//    Route::get('/user', [AuthController::class, 'user']);
+    Route::put('/user', [AuthController::class, 'update']);
+    Route::get('/user', [AuthController::class, 'getProfile']);
 });
 
 
@@ -26,13 +26,13 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'superadmin'])->group(function () {
     Route::put('/approve/{userId}', [SuperAdminController::class, 'approve']);
     Route::put('/disapprove/{userId}', [SuperAdminController::class, 'disapprove']);
-    Route::get('/getUsers', [SuperAdminController::class, 'getAllUsers']);
+    Route::get('/users', [SuperAdminController::class, 'getAllUsers']);
 });
 
-Route::get('billings/billings-pdfs', [BillingController::class, 'listOfBillsPdfs'])->middleware('auth:sanctum');
+Route::get('billings/pdfs', [BillingController::class, 'listOfBillsPdfs'])->middleware('auth:sanctum');
 //// Billings API routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/billings/createbill', [BillingController::class, 'store']);
+    Route::post('/billings/create', [BillingController::class, 'store']);
     Route::post('/billings/preview', [BillingController::class, 'preview']);
     Route::post('/billings/{id}/pdf', [BillingController::class, 'storeBillPdf']);
     Route::get('/billings', [BillingController::class, 'getAllUserBillings']);
@@ -46,11 +46,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Works API routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/works/create', [WorkController::class, 'creatework']);
+    Route::post('/work', [WorkController::class, 'creatework']);
     Route::get('/works', [WorkController::class, 'getAllWorks']);
     Route::put('/works/{id}', [WorkController::class, 'updateWork']);
     Route::post('/works/{id}/pdf', [WorkController::class, 'storePdf']);
-    Route::get('/works/allusersworks', [WorkController::class, 'getAdminAllWorks'])->middleware('admin');
+    Route::get('/works/allusers', [WorkController::class, 'getAdminAllWorks'])->middleware('admin');
     Route::get('/works/{team}', [WorkController::class, 'getWorksByTeam'])->middleware('admin');
 
     Route::get('/works/count/created', [WorkController::class, 'GetNumberOfWorks']);
