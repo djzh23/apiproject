@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'server_error' => 'Etwas ist auf der Serverseite schiefgelaufen. Bitte versuchen Sie es später erneut!',
     'user' => [
         'email' => [
             'exists' => 'Diese E-Mail-Adresse ist bereits registriert.',
@@ -24,16 +25,33 @@ return [
         'no_users_found' => 'Keine Benutzer gefunden.',
     ],
     'auth' => [
+        'register' => [
+            'success' => 'Registrierung erfolgreich.',
+            'failed' => 'Registrierung fehlgeschlagen.',
+        ],
+        'login' => [
+            'success' => 'Anmeldung erfolgreich.',
+            'failed' => 'Anmeldung fehlgeschlagen.',
+        ],
+        'password' =>[
+            'failed' => 'Ungültiges Passwort.',
+        ],
         'invalid_password' => 'Ungültiges Passwort.',
         'invalid_credentials' => 'Ungültige Anmeldedaten.',
         'logout_success' => 'Erfolgreich abgemeldet.',
         'unauthorized' => 'Nicht autorisiert.',
         'superadmin_required' => 'Superadmin-Rechte erforderlich.',
+        'admin_required' => 'Admin-Rechte erforderlich.',
     ],
     'validation' => [
+        'email' => [
+            'required' => 'Die E-Mail-Adresse ist erforderlich.',
+            'max_length' => 'Die E-Mail-Adresse darf nicht länger als 255 Zeichen sein.',
+            'invalid' => 'Die E-Mail-Adresse ist ungültig. Bitte stellen Sie sicher, dass Sie das "@"-Zeichen eingegeben haben.',
+            'not_found' => 'E-Mail-Adresse nicht gefunden.',
+        ],
         'password' => [
             'min' => 'Das Passwort muss mindestens 8 Zeichen lang sein.',
-            'server_error' => 'Etwas ist auf der Serverseite schiefgelaufen. Bitte versuchen Sie es später erneut!'
         ],
     ],
     'success' => [
@@ -90,5 +108,53 @@ return [
             'general' => 'Ein Fehler ist aufgetreten.',
             'unauthorized' => 'Nicht autorisierter Zugriff.',
         ],
+        'count' => [
+            'success' => 'Anzahl der Rechnungen erfolgreich abgerufen.',
+            'failed' => 'Anzahl der Rechnungen konnte nicht abgerufen werden.',
+        ],
     ],
+    'work' =>[
+        'create' => [
+            'success' => 'Einsatzt erfolgreich erstellt.',
+            'failed' => 'Einsatz konnte nicht erstellt werden.',
+            'validation_failed' => 'Die Validierung hat fehlgeschlagen, bitte die Eingabe prüfen .',
+        ],
+        'fetch' => [
+            'success' => 'Einsätze wurden erfolgreich geladen.',
+            'failed' => 'Einsätze konnten nicht geladen werden.',
+            'validation_failed' => 'Die Validierung hat fehlgeschlagen, bitte die Eingabe prüfen .',
+            'by_team' => [
+                'success' => 'Einsätze wurden erfolgreich nach Team geladen.',
+                'failed' => 'Problem beim Laden von Einsätze nach Team .',
+            ],
+        ],
+        'update' => [
+            'success' => 'Einsatz erfolgreich aktualisiert.',
+            'failed' => 'Einsatz konnte nicht aktualisiert werden.',
+            'validation_failed' => 'Die Validierung hat fehlgeschlagen, bitte die Eingabe prüfen .',
+            'not_found' => 'Einsatz wurde nicht gefunden.',
+        ],
+        'pdf' =>[
+            'upload' => [
+                'success' => 'PDF erfolgreich erstellt.',
+                'failed' => 'PDF konnte nicht erstellt werden.',
+            ],
+            'download' => [
+                'success' => 'PDF erfolgreich heruntergeladen.',
+                'failed' => 'PDF konnte nicht heruntergeladen werden.',
+            ],
+            'not_found' => 'PDF - Einsatzt id wurde nicht gefunden.',
+        ],
+        'count' => [
+            'standing' => [
+                'success' => 'Anzahl der unkompletten Einsätze erfolgreich abgerufen.',
+                'failed' => 'Anzahl der unkompletten Einsätze konnte nicht abgerufen werden.',
+            ],
+            'all' => [
+                'success' => 'Anzahl der abgeschlossenen Einsätze erfolgreich abgerufen.',
+                'failed' => 'Anzahl der abgeschlossenen Einsätze konnte nicht abgerufen werden.',
+            ],
+
+        ],
+    ]
 ];

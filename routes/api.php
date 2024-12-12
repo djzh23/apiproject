@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BillingController;
 use App\Http\Controllers\Api\SuperAdminController;
+use App\Http\Controllers\Api\WorkController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,7 +27,6 @@ Route::middleware(['auth:sanctum', 'superadmin'])->group(function () {
     Route::put('/approve/{userId}', [SuperAdminController::class, 'approve']);
     Route::put('/disapprove/{userId}', [SuperAdminController::class, 'disapprove']);
     Route::get('/getUsers', [SuperAdminController::class, 'getAllUsers']);
-
 });
 
 Route::get('billings/billings-pdfs', [BillingController::class, 'listOfBillsPdfs'])->middleware('auth:sanctum');
@@ -40,9 +40,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/billings/download/{filename}', [BillingController::class, 'download'])
         ->name('pdf.download')
         ->middleware('throttle:60,1', 'auth:sanctum');
+
+    Route::get('/billings/count/created', [BillingController::class, 'getNumberOfBills']);
 });
 
-//Route::get('/billings/download/{filename}', [BillingController::class, 'download'])
-//    ->name('pdf.download')
-//    ->middleware('throttle:60,1', 'auth:sanctum');
+// Works API routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/works/create', [WorkController::class, 'creatework']);
+    Route::get('/works', [WorkController::class, 'getAllWorks']);
+    Route::put('/works/{id}', [WorkController::class, 'updateWork']);
+    Route::post('/works/{id}/pdf', [WorkController::class, 'storePdf']);
+    Route::get('/works/allusersworks', [WorkController::class, 'getAdminAllWorks'])->middleware('admin');
+    Route::get('/works/{team}', [WorkController::class, 'getWorksByTeam'])->middleware('admin');
+
+    Route::get('/works/count/created', [WorkController::class, 'GetNumberOfWorks']);
+    Route::get('/works/count/standing', [WorkController::class, 'GetNumberOfStandingWorks']);
+});
+
+//Route::get('/countbillscreated', [BillingController::class, 'getNumberOfBills'])->middleware('auth:sanctum');
+//Route::get('/countworkscreated', [WorkController::class, 'GetNumberOfWorks'])->middleware('auth:sanctum');
+//Route::get('/countstandingworks', [WorkController::class, 'GetNumberOfStandingWorks'])->middleware('auth:sanctum');
 

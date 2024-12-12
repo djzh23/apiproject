@@ -7,6 +7,7 @@ use App\Traits\ApiResponses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -20,7 +21,6 @@ class BillingController extends BaseController
     {
         $this->initializeDirectories();
     }
-
     public function initializeDirectories()
     {
         // Create a directory in storage/app
@@ -29,7 +29,6 @@ class BillingController extends BaseController
         // Create a directory in public (which is linked to storage/app/public)
         Storage::disk('public')->makeDirectory('bills-public-directory');
     }
-
     public function store(Request $request): JsonResponse
     {
         try {
@@ -241,7 +240,6 @@ class BillingController extends BaseController
 
         return Storage::disk('public')->download($path);
     }
-
     public function listOfBillsPdfs(Request $request)
     {
         $userId = $request->user()->id;
@@ -256,6 +254,22 @@ class BillingController extends BaseController
         $files = $bills->pluck('pdf_file')->all();
 
         return $this->success(trans('messages.billing.pdf.list.success'), $files);
+    }
+
+    public function getNumberOfBills()
+    {
+        try{
+            $userId = Auth::id(); // Get the ID of the authenticated user
+
+            // Get only the Works that belong to the authenticated user
+            $bills = Billing::where('user_id', $userId)->get();
+            $count = $bills->count();
+
+            return $this->success(trans('messages.billing.count.success'), $count);
+        }catch (\Exception $e){
+//            return $this->error($e ->getMessage(), null);
+            return $this->error(trans('messages.billing.count.failed'), null);
+        }
 
     }
 
