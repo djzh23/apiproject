@@ -313,26 +313,12 @@ class WorkController
         try {
             // Get only the Bill that belong to the authenticated user
             $perpage = 10;
-//            $works = Work::with('ageGroups')
-//                ->where('team', $team)
-//                ->whereNotNull('pdf_file')
-//                ->where('status', 'complete')
-//                ->orderBy('created_at', 'desc')
-//                ->select((['id', 'updated_at', 'creator_id', 'date', 'status', 'team', 'ort', 'vorort', 'list_of_helpers', 'plan', 'start_work', 'reflection', 'defect', 'parent_contact', 'wellbeing_of_children', 'notes', 'wishes', 'pdf_file', 'end_work']))
-//                ->paginate($perpage);
             $works = Work::where('team', $team)
                 ->where('status', 'complete')
                 ->whereNotNull('pdf_file')
                 ->orderBy('created_at', 'desc')
                 ->select(['id', 'updated_at', 'creator_id', 'date', 'status', 'team', 'ort', 'vorort', 'list_of_helpers', 'plan', 'start_work', 'reflection', 'defect', 'parent_contact', 'wellbeing_of_children', 'notes', 'wishes', 'pdf_file', 'end_work'])
                 ->paginate($perpage);
-            // Assuming there is a 'team' column in the 'works' table
-//            $works = Work::with('ageGroups')
-//                ->where('team', $team)
-//                ->whereNotNull('pdf_file')
-//                ->where('status', 'complete')
-//                ->orderBy('created_at', 'desc')
-//                ->get();
 
             // Transform the data to make it more readable
             $worksData = $works->map(function ($works) {
