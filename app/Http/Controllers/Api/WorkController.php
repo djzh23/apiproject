@@ -313,22 +313,28 @@ class WorkController
         try {
             // Get only the Bill that belong to the authenticated user
             $perpage = 10;
-            $works = Work::with('ageGroups')
-                ->where('team', $team)
-                ->whereNotNull('pdf_file')
+            $works = Work::where('team', $team)
                 ->where('status', 'complete')
+                ->whereNotNull('pdf_file')
                 ->orderBy('created_at', 'desc')
+                ->select(['id', 'updated_at', 'creator_id', 'date', 'status', 'team', 'ort', 'vorort', 'list_of_helpers', 'plan', 'start_work', 'reflection', 'defect', 'parent_contact', 'wellbeing_of_children', 'notes', 'wishes', 'pdf_file', 'end_work'])
                 ->paginate($perpage);
-            // Assuming there is a 'team' column in the 'works' table
-//            $works = Work::with('ageGroups')
-//                ->where('team', $team)
-//                ->whereNotNull('pdf_file')
-//                ->where('status', 'complete')
-//                ->orderBy('created_at', 'desc')
-//                ->get();
 
+            // Transform the data to make it more readable
+            $worksData = $works->map(function ($works) {
+                return [
+                    'id' => $works->id,
+                    'data' => [
+                        'id' => $works->id,
+                        'date' => $works->date,
+                        'team' => $works->team,
+                        'creator_name' => $works->creator ? $works->creator->firstname . ' ' . $works->creator->lastname : null,
+                        'pdf_file' => $works->pdf_file,
+                    ]
+                ];
+            });
 
-            if ($works != null && $works->count() > 0) {
+            if ($worksData != null && $worksData->count() > 0) {
                 $pagination = [
                     'total' => $works->total(),
                     "per_page" => $perpage,
@@ -342,18 +348,16 @@ class WorkController
                     'prev_page_url' => $works->previousPageUrl(),
                     'path' => $works->path(),
                 ];
-                return $this->success(trans('messages.work.fetch.by_team.success'), $works, $pagination);
+                return $this->success(trans('messages.work.fetch.by_team.success'), $worksData, $pagination);
             }
             else{
-                return $this->success(trans('messages.work.fetch.by_team.empty'), $works);
+                return $this->success(trans('messages.work.fetch.by_team.empty'), null);
             }
 
         } catch (\Exception $e) {
             return $this->error(__('messages.work.fetch.by_team.failed'), null);
 //            return $this->error($e->getMessage(), null);
         }
-
-
     }
 
     public function GetNumberOfWorks()
