@@ -7,6 +7,7 @@ use App\Traits\ApiResponses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -253,6 +254,22 @@ class BillingController extends BaseController
         $files = $bills->pluck('pdf_file')->all();
 
         return $this->success(trans('messages.billing.pdf.list.success'), $files);
+    }
+
+    public function getNumberOfBills()
+    {
+        try{
+            $userId = Auth::id(); // Get the ID of the authenticated user
+
+            // Get only the Works that belong to the authenticated user
+            $bills = Billing::where('user_id', $userId)->get();
+            $count = $bills->count();
+
+            return $this->success(trans('messages.billing.count.success'), $count);
+        }catch (\Exception $e){
+//            return $this->error($e ->getMessage(), null);
+            return $this->error(trans('messages.billing.count.failed'), null);
+        }
 
     }
 

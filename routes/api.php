@@ -40,6 +40,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/billings/download/{filename}', [BillingController::class, 'download'])
         ->name('pdf.download')
         ->middleware('throttle:60,1', 'auth:sanctum');
+
+    Route::get('/billings/count/created', [BillingController::class, 'getNumberOfBills']);
 });
 
 // Works API routes
@@ -50,5 +52,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/works/{id}/pdf', [WorkController::class, 'storePdf']);
     Route::get('/works/allusersworks', [WorkController::class, 'getAdminAllWorks'])->middleware('admin');
     Route::get('/works/{team}', [WorkController::class, 'getWorksByTeam'])->middleware('admin');
+
+    Route::get('/works/count/created', [WorkController::class, 'GetNumberOfWorks']);
+    Route::get('/works/count/standing', [WorkController::class, 'GetNumberOfStandingWorks']);
 });
+
+//Route::get('/countbillscreated', [BillingController::class, 'getNumberOfBills'])->middleware('auth:sanctum');
+//Route::get('/countworkscreated', [WorkController::class, 'GetNumberOfWorks'])->middleware('auth:sanctum');
+//Route::get('/countstandingworks', [WorkController::class, 'GetNumberOfStandingWorks'])->middleware('auth:sanctum');
 

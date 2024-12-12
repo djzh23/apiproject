@@ -108,6 +108,10 @@ return [
             'general' => 'Ein Fehler ist aufgetreten.',
             'unauthorized' => 'Nicht autorisierter Zugriff.',
         ],
+        'count' => [
+            'success' => 'Anzahl der Rechnungen erfolgreich abgerufen.',
+            'failed' => 'Anzahl der Rechnungen konnte nicht abgerufen werden.',
+        ],
     ],
     'work' =>[
         'create' => [
@@ -140,6 +144,17 @@ return [
                 'failed' => 'PDF konnte nicht heruntergeladen werden.',
             ],
             'not_found' => 'PDF - Einsatzt id wurde nicht gefunden.',
+        ],
+        'count' => [
+            'standing' => [
+                'success' => 'Anzahl der unkompletten Einsätze erfolgreich abgerufen.',
+                'failed' => 'Anzahl der unkompletten Einsätze konnte nicht abgerufen werden.',
+            ],
+            'all' => [
+                'success' => 'Anzahl der abgeschlossenen Einsätze erfolgreich abgerufen.',
+                'failed' => 'Anzahl der abgeschlossenen Einsätze konnte nicht abgerufen werden.',
+            ],
+
         ],
     ]
 ];

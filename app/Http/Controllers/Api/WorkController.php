@@ -326,4 +326,34 @@ class WorkController
 
 
     }
+
+    public function GetNumberOfWorks()
+    {
+        try{
+            $userId = Auth::id();
+            // Get only the Works that belong to the authenticated user
+            $works = Work::where('creator_id', $userId)->get();
+
+            return $this->success(trans('messages.work.count.all.success'), $works->count());
+        }
+        catch (\Exception $e) {
+            return $this->error(__('messages.work.count.all.failed'), null);
+        }
+
+    }
+
+    public function GetNumberOfStandingWorks()
+    {
+        try{
+            $userId = Auth::id(); // Get the ID of the authenticated user
+
+            // Get only the Works that belong to the authenticated user
+            $works = Work::where('creator_id', $userId)->where('status', 'standing')->get();
+
+            return $this->success(trans('messages.work.count.standing.success'), $works->count());
+        }
+        catch (\Exception $e) {
+            return $this->error(__('messages.work.count.standing.failed'), null);
+        }
+    }
 }
