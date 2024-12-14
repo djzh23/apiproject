@@ -16,7 +16,6 @@ class BillingController extends BaseController
 {
     use ApiResponses;
     private const PDF_DIRECTORY = 'billings-pdfs';
-
     public function __construct()
     {
         $this->initializeDirectories();
@@ -32,7 +31,6 @@ class BillingController extends BaseController
     public function store(Request $request): JsonResponse
     {
         try {
-
             $billing = new Billing([
                 'user_id' => $request->user()->id,
                 'date' => $request->date,
@@ -44,11 +42,10 @@ class BillingController extends BaseController
                 'isvorort' => $request->isvorort,
 
             ]);
-
             $billing->save();
-
             return $this->success(trans('messages.billing.create.success'), $billing);
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             return $this->error(__('messages.billing.create.failed'), null);
         }
     }
@@ -85,86 +82,97 @@ class BillingController extends BaseController
     }
     public function storeBillPdf(Request $request, $id)
     {
-        // Find the bill by its id
-        $bill = Billing::find($id);
+        try{
+            $bill = Billing::find($id);
 
-        // If the bill doesn't exist, return an error response
-        if (!$bill) {
-            return $this->error(__('messages.billing.pdf.upload.failed'), null);
+            // If the bill doesn't exist, return an error response
+            if (!$bill) {
+                return $this->error(__('messages.billing.pdf.upload.failed'), null);
+            }
+
+            // Validate the request to ensure a file was uploaded
+            $request->validate([
+                'pdf' => 'required|mimes:pdf|max:2048', // 2MB Max
+            ]);
+
+            // Generate a custom filename
+            $date = date('Y-m-d'); // You can replace this with the actual date from the bill
+            $month = $bill->month; // Replace this with the actual month from the bill
+            $string = 'rechnung';
+            $number = $bill->billing_number;
+            $type = $bill->isvorort ? '' : 'ausflug';
+            $filename = "{$date}-{$month}-{$type}-{$string}-{$number}.pdf";
+
+            // Store the uploaded pdf file with the custom filename and get its path
+            $path = $request->file('pdf')->storeAs('billings-pdfs', $filename, 'public');
+
+            // Update the bill 's pdf field with the path of the stored file
+            $bill->pdf_file = $path;
+            $bill->save();
+
+            return $this->success(trans('messages.billing.pdf.upload.success'), $bill);
+        }
+        catch (\Exception $e) {
+            Log::error("Storing Billing PDF error-server: $e");
+            return $this->error(__('messages.server_error'), null);
+
         }
 
-        // Validate the request to ensure a file was uploaded
-        $request->validate([
-            'pdf' => 'required|mimes:pdf|max:2048', // 2MB Max
-        ]);
-
-        // Generate a custom filename
-        $date = date('Y-m-d'); // You can replace this with the actual date from the bill
-        $month = $bill->month; // Replace this with the actual month from the bill
-        $string = 'rechnung';
-        $number = $bill->billing_number;
-        $type = $bill->isvorort ? '' : 'ausflug';
-        $filename = "{$date}-{$month}-{$type}-{$string}-{$number}.pdf";
-
-        // Store the uploaded pdf file with the custom filename and get its path
-        $path = $request->file('pdf')->storeAs('billings-pdfs', $filename, 'public');
-
-        // Update the bill 's pdf field with the path of the stored file
-        $bill->pdf_file = $path;
-        $bill->save();
-
-        return $this->success(trans('messages.billing.pdf.upload.success'), $bill);
 
     }
     public function getAllUserBillings()
     {
-        // Get the ID of the authenticated user
-        $userId = auth()->id();
+        try{
+            $userId = auth()->id();
 
-        // Get only the Works that belong to the authenticated user
-        $perpage = 10;
-        $billings = Billing::where('user_id', $userId)
-            ->latest('created_at')
-            ->paginate($perpage); // Change '10' to however many works per page you want
+            // Get only the Works that belong to the authenticated user ordered by the latest
+            $perpage = 10;
+            $billings = Billing::where('user_id', $userId)
+                ->latest('created_at')
+                ->paginate($perpage); // Paginate the results
 
 
-        // Transform the data to make it more readable
-        $billingsData = $billings->map(function ($billing) {
-            return [
-                'id' => $billing->id,
-                'billing_number' => $billing->billing_number,
-                'date' => $billing->date,
-                'team' => $billing->team,
-                'month' => $billing->month,
-                'somme_all' => $billing->somme_all,
-                'isvorort' => $billing->isvorort,
-                'pdf_file' => $billing->pdf_file,
+            // Transform the data to make it more readable
+            $billingsData = $billings->map(function ($billing) {
+                return [
+                    'id' => $billing->id,
+                    'billing_number' => $billing->billing_number,
+                    'date' => $billing->date,
+                    'team' => $billing->team,
+                    'month' => $billing->month,
+                    'somme_all' => $billing->somme_all,
+                    'isvorort' => $billing->isvorort,
+                    'pdf_file' => $billing->pdf_file,
                 ];
-        });
-        if($billingsData->isEmpty()){
-            return $this->error(__('messages.billing.fetch.not_found'), null);
+            });
+            if($billingsData->isEmpty()){
+                return $this->error(__('messages.billing.fetch.not_found'), null);
+            }
+
+            $pagination = [
+                'total' => $billings->total(),
+                "per_page"=> $perpage,
+                'current_page' => $billings->currentPage(),
+                'last_page' => $billings->lastPage(),
+                'from' => $billings->firstItem(),
+                'to' => $billings->lastItem(),
+                'first_page_url' => $billings->url(1),
+                'last_page_url' => $billings->url($billings->lastPage()),
+                'next_page_url' => $billings->nextPageUrl(),
+                'prev_page_url' => $billings->previousPageUrl(),
+                'path' => $billings->path(),
+            ];
+            return $this->success(__('messages.billing.fetch.success'), $billingsData,$pagination);
         }
-
-        $pagination = [
-            'total' => $billings->total(),
-            "per_page"=> $perpage,
-            'current_page' => $billings->currentPage(),
-            'last_page' => $billings->lastPage(),
-            'from' => $billings->firstItem(),
-            'to' => $billings->lastItem(),
-            'first_page_url' => $billings->url(1),
-            'last_page_url' => $billings->url($billings->lastPage()),
-            'next_page_url' => $billings->nextPageUrl(),
-            'prev_page_url' => $billings->previousPageUrl(),
-            'path' => $billings->path(),
-        ];
-        return $this->success(__('messages.billing.fetch.success'), $billingsData,$pagination);
-
+        catch (\Exception $e) {
+            Log::error("Fetching Billings error-server: $e");
+            return $this->error(__('messages.server_error'), null);
+        }
     }
     public function getBillsByMonth(Request $request, $month)
     {
         try{
-            // Get only the Bill that belong to the authenticated user
+            // Get only the Bill that belong to the authenticated user and the specified month ordered by the latest
             $perpage = 10;
             $billings = Billing::where('user_id', $request->user()->id)
                 ->where('month', $month)
@@ -207,19 +215,26 @@ class BillingController extends BaseController
             return $this->success(trans('messages.billing.pdf.month_pagination.empty'), null);
         }
         catch (\Exception $e){
+            Log::error("Fetching Billings by month error-server: $e");
             return $this->error(trans('messages.billing.pdf.month_pagination.failed'), null);
         }
 
     }
     public function download($filename)
     {
-        $path = 'billings-pdfs/' . $filename;
+        try{
+            $path = 'billings-pdfs/' . $filename;
 
-        if (!Storage::disk('public')->exists($path)) {
-            return $this->success(trans('messages.billing.pdf.download.failed'), null);
+            if (!Storage::disk('public')->exists($path)) {
+                return $this->success(trans('messages.billing.pdf.download.failed'), null);
+            }
+
+            return Storage::disk('public')->download($path);
         }
-
-        return Storage::disk('public')->download($path);
+        catch (\Exception $e) {
+            Log::error("Downloading Billing PDF error-server: $e");
+            return $this->error(__('messages.server_error'), null);
+        }
     }
     public function listOfBillsPdfs(Request $request)
     {
@@ -238,7 +253,6 @@ class BillingController extends BaseController
 
         return $this->success(trans('messages.billing.pdf.list.success'), $files);
     }
-
     public function getNumberOfBills()
     {
         try{
