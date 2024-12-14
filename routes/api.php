@@ -37,7 +37,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/billings/{id}/pdf', [BillingController::class, 'storeBillPdf']);
     Route::get('/billings', [BillingController::class, 'getAllUserBillings']);
     Route::get('/billings/{month}', [BillingController::class, 'getBillsByMonth']);
-    Route::get('/billings/download/{filename}', [BillingController::class, 'download'])
+//    Route::get('/billings/download/{filename}', [BillingController::class, 'download'])
+//        ->name('pdf.downloadBillings')
+//        ->middleware('throttle:60,1', 'auth:sanctum');
+    Route::get('/billings/download/{id}', [BillingController::class, 'download'])
         ->name('pdf.downloadBillings')
         ->middleware('throttle:60,1', 'auth:sanctum');
 
@@ -55,7 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/works/count/created', [WorkController::class, 'GetNumberOfWorks']);
     Route::get('/works/count/standing', [WorkController::class, 'GetNumberOfStandingWorks']);
-    Route::get('/works/download/{filename}', [WorkController::class, 'download'])
+    Route::get('/works/download/{id}', [WorkController::class, 'download'])
         ->name('pdf.download')
         ->middleware('throttle:60,1', 'auth:sanctum');
 //    Route::get('/works/download/{filename}', [WorkController::class, 'download'])

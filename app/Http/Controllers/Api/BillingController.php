@@ -28,7 +28,7 @@ class BillingController extends BaseController
         // Create a directory in public (which is linked to storage/app/public)
         Storage::disk('public')->makeDirectory('billings-pdfs');
     }
-    public function download($filename)
+    public function download_($filename)
     {
         try{
             $path = self::PDF_DIRECTORY ."/". $filename;
@@ -44,6 +44,29 @@ class BillingController extends BaseController
             return $this->error(__('messages.server_error'), null);
         }
     }
+    public function download($id)
+    {
+        try{
+            $bill = Billing::find($id);
+
+            if (!$bill) {
+                return $this->error(__('messages.billing.pdf.download.failed'), null);
+            }
+
+            $path = $bill->pdf_file;
+
+            if (!Storage::disk('public')->exists($path)) {
+                return $this->error(__('messages.billing.pdf.download.failed'), $path);
+            }
+
+            return Storage::disk('public')->download($path);
+        }
+        catch (\Exception $e) {
+            Log::error("download function error-server: $e");
+            return $this->error(__('messages.server_error'), null);
+        }
+    }
+
     public function store(Request $request): JsonResponse
     {
         try {
@@ -119,6 +142,7 @@ class BillingController extends BaseController
             $type = $bill->isvorort ? '' : 'ausflug';
             $filename = "{$date}-{$month}-{$type}-{$string}-{$number}.pdf";
 
+//            $encryptedFilename = Crypt::encryptString($filename);
             // Store the uploaded pdf file with the custom filename and get its path
             $path = $request->file('pdf')->storeAs('billings-pdfs', $filename, 'public');
 
