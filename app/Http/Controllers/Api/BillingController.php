@@ -20,13 +20,29 @@ class BillingController extends BaseController
     {
         $this->initializeDirectories();
     }
-    public function initializeDirectories()
+    public function initializeDirectories(): void
     {
         // Create a directory in storage/app
-        Storage::makeDirectory('app/bills-directory');
+//        Storage::makeDirectory('app/bills-directory');
 
         // Create a directory in public (which is linked to storage/app/public)
-        Storage::disk('public')->makeDirectory('bills-public-directory');
+        Storage::disk('public')->makeDirectory('billings-pdfs');
+    }
+    public function download($filename)
+    {
+        try{
+            $path = self::PDF_DIRECTORY ."/". $filename;
+
+            if (!Storage::disk('public')->exists($path)) {
+                return $this->error(trans('messages.billing.pdf.download.failed'), $path);
+            }
+
+            return Storage::disk('public')->download($path);
+        }
+        catch (\Exception $e) {
+            Log::error("download function error-server: $e");
+            return $this->error(__('messages.server_error'), null);
+        }
     }
     public function store(Request $request): JsonResponse
     {
@@ -45,7 +61,7 @@ class BillingController extends BaseController
             $billing->save();
             return $this->success(trans('messages.billing.create.success'), $billing);
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
+            Log::error("store() function error-server: $e");
             return $this->error(__('messages.billing.create.failed'), null);
         }
     }
@@ -77,15 +93,15 @@ class BillingController extends BaseController
             return $this->success(trans('messages.billing.preview.success'), $billing);
 
         } catch (ValidationException $e) {
+            Log::error("preview() function error-server: $e");
             return $this->error(trans('messages.billing.preview.failed'), null);
         }
     }
-    public function storeBillPdf(Request $request, $id)
+    public function storeBillPdf(Request $request, $id): JsonResponse
     {
         try{
             $bill = Billing::find($id);
 
-            // If the bill doesn't exist, return an error response
             if (!$bill) {
                 return $this->error(__('messages.billing.pdf.upload.failed'), null);
             }
@@ -113,12 +129,9 @@ class BillingController extends BaseController
             return $this->success(trans('messages.billing.pdf.upload.success'), $bill);
         }
         catch (\Exception $e) {
-            Log::error("Storing Billing PDF error-server: $e");
+            Log::error("storeBillPdf function error-server: $e");
             return $this->error(__('messages.server_error'), null);
-
         }
-
-
     }
     public function getAllUserBillings()
     {
@@ -165,7 +178,7 @@ class BillingController extends BaseController
             return $this->success(__('messages.billing.fetch.success'), $billingsData,$pagination);
         }
         catch (\Exception $e) {
-            Log::error("Fetching Billings error-server: $e");
+            Log::error("getAllUserBillings function error-server: $e");
             return $this->error(__('messages.server_error'), null);
         }
     }
@@ -215,43 +228,33 @@ class BillingController extends BaseController
             return $this->success(trans('messages.billing.pdf.month_pagination.empty'), null);
         }
         catch (\Exception $e){
-            Log::error("Fetching Billings by month error-server: $e");
+            Log::error("getBillsByMonth function error-server: $e");
             return $this->error(trans('messages.billing.pdf.month_pagination.failed'), null);
         }
 
     }
-    public function download($filename)
-    {
-        try{
-            $path = 'billings-pdfs/' . $filename;
 
-            if (!Storage::disk('public')->exists($path)) {
-                return $this->success(trans('messages.billing.pdf.download.failed'), null);
-            }
-
-            return Storage::disk('public')->download($path);
-        }
-        catch (\Exception $e) {
-            Log::error("Downloading Billing PDF error-server: $e");
-            return $this->error(__('messages.server_error'), null);
-        }
-    }
     public function listOfBillsPdfs(Request $request)
     {
-        $userId = $request->user()->id;
+        try{
+            $userId = $request->user()->id;
 
-        $bills = Billing::where('user_id', $userId)->whereNotNull('pdf_file')
-                            ->latest('created_at')
-                            ->get();
+            $bills = Billing::where('user_id', $userId)->whereNotNull('pdf_file')
+                ->latest('created_at')
+                ->get();
 
+            if ($bills->isEmpty()) {
+                return $this->error(trans('messages.billing.pdf.list.error'), null);
+            }
 
-        if ($bills->isEmpty()) {
-            return $this->error(trans('messages.billing.pdf.list.error'), null);
+            $files = $bills->pluck('pdf_file')->all();
+
+            return $this->success(trans('messages.billing.pdf.list.success'), $files);
         }
-
-        $files = $bills->pluck('pdf_file')->all();
-
-        return $this->success(trans('messages.billing.pdf.list.success'), $files);
+        catch (\Exception $e) {
+            Log::error("listOfBillsPdfs function error-server: $e");
+            return $this->error(__('messages.server_error'), null);
+        }
     }
     public function getNumberOfBills()
     {
@@ -264,10 +267,9 @@ class BillingController extends BaseController
 
             return $this->success(trans('messages.billing.count.success'), $count);
         }catch (\Exception $e){
-//            return $this->error($e ->getMessage(), null);
+            Log::error("getNumberOfBills function error-server: $e");
             return $this->error(trans('messages.billing.count.failed'), null);
         }
-
     }
 
 }

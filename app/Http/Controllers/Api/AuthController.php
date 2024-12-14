@@ -30,63 +30,70 @@ class AuthController extends BaseController
     use ApiResponses;
     public function register(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'firstname' => ['required', 'string' , new StringLengthRule()],
-            'lastname' => ['required', 'string' , new StringLengthRule()],
-            'city' => ['required', 'string' , new StringLengthRule()],
-            'country' => ['required', 'string' , new StringLengthRule(), new NoDigitsRule()],
-            'number' => ['required', new PhoneRule()],
-            'pzl' => ['required', new PostalCodeRule()],
-            'email' => [
-                'required',
-                new StrictEmailRule,
-                new StringLengthRule(),
-                'unique:users,email'  // Prüft auf Einzigartigkeit in der users-Tabelle
-            ],
-            'password' => ['required', 'string' , new PasswordRule()],
-            'steueridentifikationsnummer' => ['required', new SteueridentifikationsnummerRule()],
-            'street' => ['required', 'string' , new StringLengthRule()],
-            'bank_name' => 'required|string',
-            'bic' => ['required', new BicRule()],
-            'iban' => ['required', new ValidIban()], // modify the validation error in vendors folder (readonly issue)
-            'role_id' => 'nullable|exists:roles,id',
-        ]);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors()->all();
-            $errorMessage = implode(' ', $errors);
-
-            // Nutze die Übersetzungen
-            if (str_contains($errorMessage, 'email has already been taken')) {
-                return $this->error(__('messages.user.email.exists'), null);
-            }
-
-            return $this->error($errorMessage, null);
-        }
-
-        try {
-            $newUser = User::create([
-                "firstname" => $request->input("firstname"),
-                "lastname" => $request->input("lastname"),
-                "email" => $request->input("email"),
-                "password" => bcrypt($request->input('password')),
-                "steueridentifikationsnummer" => $request->input("steueridentifikationsnummer"),
-                "street" => $request->input("street"),
-                "number" => $request->input("number"),
-                "pzl" => $request->input("pzl"),
-                "city" => $request->input("city"),
-                "country" => $request->input("country"),
-                "bank_name" => $request->input("bank_name"),
-                "iban" => $request->input("iban"),
-                "bic" => $request->input("bic"),
-                'role_id' => 5,
-                'approved' => false, // Not approved initially
+        try{
+            $validator = Validator::make($request->all(), [
+                'firstname' => ['required', 'string' , new StringLengthRule()],
+                'lastname' => ['required', 'string' , new StringLengthRule()],
+                'city' => ['required', 'string' , new StringLengthRule()],
+                'country' => ['required', 'string' , new StringLengthRule(), new NoDigitsRule()],
+                'number' => ['required', new PhoneRule()],
+                'pzl' => ['required', new PostalCodeRule()],
+                'email' => [
+                    'required',
+                    new StrictEmailRule,
+                    new StringLengthRule(),
+                    'unique:users,email'  // Prüft auf Einzigartigkeit in der users-Tabelle
+                ],
+                'password' => ['required', 'string' , new PasswordRule()],
+                'steueridentifikationsnummer' => ['required', new SteueridentifikationsnummerRule()],
+                'street' => ['required', 'string' , new StringLengthRule()],
+                'bank_name' => 'required|string',
+                'bic' => ['required', new BicRule()],
+                'iban' => ['required', new ValidIban()], // modify the validation error in vendors folder (readonly issue)
+                'role_id' => 'nullable|exists:roles,id',
             ]);
 
-            return $this->success(trans('messages.user.registered'), $newUser);
-        } catch (\Exception $e) {
-            return $this->error(trans('messages.errors.registration_failed'), null);
+            if ($validator->fails()) {
+                $errors = $validator->errors()->all();
+                $errorMessage = implode(' ', $errors);
+
+                // Nutze die Übersetzungen
+                if (str_contains($errorMessage, 'email has already been taken')) {
+                    return $this->error(__('messages.user.email.exists'), null);
+                }
+
+                return $this->error($errorMessage, null);
+            }
+
+            try {
+                $newUser = User::create([
+                    "firstname" => $request->input("firstname"),
+                    "lastname" => $request->input("lastname"),
+                    "email" => $request->input("email"),
+                    "password" => bcrypt($request->input('password')),
+                    "steueridentifikationsnummer" => $request->input("steueridentifikationsnummer"),
+                    "street" => $request->input("street"),
+                    "number" => $request->input("number"),
+                    "pzl" => $request->input("pzl"),
+                    "city" => $request->input("city"),
+                    "country" => $request->input("country"),
+                    "bank_name" => $request->input("bank_name"),
+                    "iban" => $request->input("iban"),
+                    "bic" => $request->input("bic"),
+                    'role_id' => 5,
+                    'approved' => false, // Not approved initially
+                ]);
+
+                return $this->success(trans('messages.user.registered'), $newUser);
+            } catch (\Exception $e) {
+                return $this->error(trans('messages.errors.registration_failed'), null);
+            }
         }
+        catch (\Exception $e) {
+            Log::error("register() function error-server: $e");
+            return $this->error(__('messages.server_error'), null);
+        }
+
     }
     public function login(Request $request): JsonResponse
     {
@@ -161,9 +168,8 @@ class AuthController extends BaseController
 
         }
         catch (\Exception $e) {
-            Log::error("Error logging in user: $e");
+            Log::error("login function error-server: $e");
             return $this->error(__('messages.server_error'), null);
-
         }
     }
     public function logout(Request $request): JsonResponse
@@ -174,7 +180,7 @@ class AuthController extends BaseController
             return $this->success(__('messages.auth.logout_success'), null);
         }
         catch (\Exception $e) {
-            Log::error("Error logging out user: $e");
+            Log::error("logout function error-server: $e");
             return $this->error(__('messages.server_error'), null);
         }
     }
@@ -199,7 +205,7 @@ class AuthController extends BaseController
             ]);
         }
         catch (\Exception $e) {
-            Log::error("Error sending password reset link: $e");
+            Log::error("forgotPassword function error-server:: $e");
             return $this->error(__('messages.server_error'), null);
         }
 
@@ -233,7 +239,7 @@ class AuthController extends BaseController
             ]);
         }
         catch (\Exception $e) {
-            Log::error("Error resetting password: $e");
+            Log::error("resetPassword() function error-server:: $e");
             return $this->error(__('messages.server_error'), null);
         }
 
@@ -287,7 +293,7 @@ class AuthController extends BaseController
             }
         }
         catch (\Exception $e) {
-            Log::error("Error updating user: $e");
+            Log::error("update() Profile function error-server:: $e");
             return $this->error(__('messages.server_error'), null);
         }
 
@@ -304,7 +310,7 @@ class AuthController extends BaseController
             return $this->success(__('messages.user.found'), $user);
         }
         catch (\Exception $e) {
-            Log::error("Error fetching user profile: $e");
+            Log::error("getProfile() function error-server:: $e");
             return $this->error(__('messages.server_error'), null);
         }
 

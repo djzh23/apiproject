@@ -20,41 +20,54 @@ class WorkController
 {
     use ApiResponses;
 
+    private const PDF_DIRECTORY = 'works-pdfs';
+    public function __construct()
+    {
+        $this->initializeDirectories();
+    }
+    public function initializeDirectories(): void
+    {
+        Storage::disk('public')->makeDirectory(self::PDF_DIRECTORY);
+    }
     public function creatework(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'date' => 'required|date',
-            'team' => 'required|string',
-            'ort' => 'required|string',
-            'vorort' => 'required|boolean',
-            'list_of_helpers' => 'required|array',
-            'plan' => 'required|string',
-            'start_work' => 'required|date_format:H:i',
-        ]);
+        try{
+            $validator = Validator::make($request->all(), [
+                'date' => 'required|date',
+                'team' => 'required|string',
+                'ort' => 'required|string',
+                'vorort' => 'required|boolean',
+                'list_of_helpers' => 'required|array',
+                'plan' => 'required|string',
+                'start_work' => 'required|date_format:H:i',
+            ]);
 
-        if ($validator->fails()) {
-            Log::error('Job creation validation failed: ' . $validator->errors());
-            return $this->error(__('messages.work.create.validation_failed'), null);
+            if ($validator->fails()) {
+                Log::error('Job creation validation failed: ' . $validator->errors());
+                return $this->error(__('messages.work.create.validation_failed'), null);
+            }
+
+            // If validation passes, get the validated data
+            $validatedData = $validator->validated();
+
+            // Add the creator_id to the validated data
+            $validatedData['creator_id'] = auth()->id();
+
+            try {
+                // Create the work with the validated data
+                $work = Work::create($validatedData);
+
+                return $this->success(trans('messages.work.create.success'), $work);
+
+            } catch (\Exception $e) {
+                return $this->error(__('messages.work.create.failed'), null);
+            }
         }
-
-        // If validation passes, get the validated data
-        $validatedData = $validator->validated();
-
-        // Add the creator_id to the validated data
-        $validatedData['creator_id'] = auth()->id();
-
-        try {
-            // Create the work with the validated data
-            $work = Work::create($validatedData);
-
-            return $this->success(trans('messages.work.create.success'), $work);
-
-        } catch (\Exception $e) {
-            return $this->error(__('messages.work.create.failed'), null);
-
+        catch (\Exception $e) {
+            Log::error("creatework() function error-server: $e");
+            return $this->error(__('messages.server_error'), null);
         }
     }
-
     public function getAllWorks(): JsonResponse
     {
         try {
@@ -120,128 +133,139 @@ class WorkController
             return $this->success(trans('messages.work.fetch.success'), $worksData, $pagination);
 
         } catch (\Exception $e) {
-            return $this->error(__('messages.work.fetch.failed'), null);
+            Log::error("getAllWorks() function error-server: $e");
+            return $this->error(__('messages.server_error'), null);
         }
     }
-
     public function updateWork(Request $request, $id): JsonResponse
     {
-        // Find the work by its id
-        $work = Work::find($id);
+        try{
+            // Find the work by its id
+            $work = Work::find($id);
 
-        // If the work doesn't exist, return an error response
-        if (!$work) {
-            return $this->error(__('messages.work.update.not_found'), null);
-        }
-
-        // Validate the incoming request data
-        $validator = Validator::make($request->all(), [
-            'date' => 'sometimes|required|date',
-            'start_work' => 'sometimes|required|date_format:H:i',
-            'team' => 'sometimes|required|string',
-            'ort' => 'sometimes|required|string',
-            'vorort' => 'sometimes|required|boolean',
-            'list_of_helpers' => 'sometimes|nullable|array',
-            'plan' => 'sometimes|required|string',
-
-
-            'reflection' => 'sometimes|required|string',
-
-            'defect' => 'sometimes|nullable|string',
-            'parent_contact' => 'sometimes|nullable|string',
-
-            'wellbeing_of_children' => 'sometimes|nullable|string',
-
-            'notes' => 'sometimes|nullable|string',
-            'wishes' => 'sometimes|nullable|string',
-
-
-            'end_work' => 'sometimes|required|date_format:H:i',
-
-            'kids_data' => 'sometimes|required|array',
-            'kids_data.*.age_group_id' => 'required_with:kids_data|integer|exists:age_groups,id',
-            'kids_data.*.boys' => 'required_with:kids_data|integer|min:0',
-            'kids_data.*.girls' => 'required_with:kids_data|integer|min:0',
-            // Add validation rules for other fields in the FullWork model
-        ]);
-
-        if ($validator->fails()) {
-            return $this->error(__('messages.work.update.validation_failed'), null);
-        }
-
-        // If validation passes, get the validated data
-        $validatedData = $validator->validated();
-
-        // Update the work with the validated data
-        $work->update($validatedData);
-
-        // Update kids data in the pivot table if provided
-        if ($request->has('kids_data')) {
-            $kidsData = $request->input('kids_data');
-            $syncData = [];
-            foreach ($kidsData as $kid) {
-                $syncData[$kid['age_group_id']] = [
-                    'boys' => $kid['boys'],
-                    'girls' => $kid['girls'],
-                ];
+            // If the work doesn't exist, return an error response
+            if (!$work) {
+                return $this->error(__('messages.work.update.not_found'), null);
             }
-            $work->ageGroups()->sync($syncData);
-        }
 
-        $requiredFields = ['plan', 'reflection']; // Add all your required fields here
-        $allFieldsFilled = true;
+            // Validate the incoming request data
+            $validator = Validator::make($request->all(), [
+                'date' => 'sometimes|required|date',
+                'start_work' => 'sometimes|required|date_format:H:i',
+                'team' => 'sometimes|required|string',
+                'ort' => 'sometimes|required|string',
+                'vorort' => 'sometimes|required|boolean',
+                'list_of_helpers' => 'sometimes|nullable|array',
+                'plan' => 'sometimes|required|string',
 
-        foreach ($requiredFields as $field) {
-            if (empty($work->$field)) {
-                $allFieldsFilled = false;
-                break;
+
+                'reflection' => 'sometimes|required|string',
+
+                'defect' => 'sometimes|nullable|string',
+                'parent_contact' => 'sometimes|nullable|string',
+
+                'wellbeing_of_children' => 'sometimes|nullable|string',
+
+                'notes' => 'sometimes|nullable|string',
+                'wishes' => 'sometimes|nullable|string',
+
+
+                'end_work' => 'sometimes|required|date_format:H:i',
+
+                'kids_data' => 'sometimes|required|array',
+                'kids_data.*.age_group_id' => 'required_with:kids_data|integer|exists:age_groups,id',
+                'kids_data.*.boys' => 'required_with:kids_data|integer|min:0',
+                'kids_data.*.girls' => 'required_with:kids_data|integer|min:0',
+                // Add validation rules for other fields in the FullWork model
+            ]);
+
+            if ($validator->fails()) {
+                return $this->error(__('messages.work.update.validation_failed'), null);
             }
+
+            // If validation passes, get the validated data
+            $validatedData = $validator->validated();
+
+            // Update the work with the validated data
+            $work->update($validatedData);
+
+            // Update kids data in the pivot table if provided
+            if ($request->has('kids_data')) {
+                $kidsData = $request->input('kids_data');
+                $syncData = [];
+                foreach ($kidsData as $kid) {
+                    $syncData[$kid['age_group_id']] = [
+                        'boys' => $kid['boys'],
+                        'girls' => $kid['girls'],
+                    ];
+                }
+                $work->ageGroups()->sync($syncData);
+            }
+
+            $requiredFields = ['plan', 'reflection']; // Add all your required fields here
+            $allFieldsFilled = true;
+
+            foreach ($requiredFields as $field) {
+                if (empty($work->$field)) {
+                    $allFieldsFilled = false;
+                    break;
+                }
+            }
+
+            // Update status based on field values
+            if ($allFieldsFilled) {
+                $work->status = 'complete';
+            } else {
+                $work->status = 'standing';
+            }
+
+            $work->save();
+
+            return $this->success(trans('messages.work.update.success'), $work);
         }
-
-        // Update status based on field values
-        if ($allFieldsFilled) {
-            $work->status = 'complete';
-        } else {
-            $work->status = 'standing';
+        catch (\Exception $e) {
+            Log::error("updateWork() function error-server: $e");
+            return $this->error(__('messages.server_error'), null);
         }
-
-        $work->save();
-
-        return $this->success(trans('messages.work.update.success'), $work);
     }
-
     public function storePdf(Request $request, $id): JsonResponse
     {
-        // Find the work by its id
-        $work = Work::find($id);
+        try{
+            // Find the work by its id
+            $work = Work::find($id);
 
-        // If the work doesn't exist, return an error response
-        if (!$work) {
-            return $this->error(__('messages.work.pdf.not_found'), null);
+            // If the work doesn't exist, return an error response
+            if (!$work) {
+                return $this->error(__('messages.work.pdf.not_found'), null);
+            }
+
+            // Validate the request to ensure a file was uploaded
+            $request->validate([
+                'pdf' => 'required|mimes:pdf|max:2048', // 2MB Max
+            ]);
+
+            // Format the date to 'YYYY-MM-DD'
+            $date = Carbon::parse($work->date)->format('Y-m-d');
+
+
+            $team = $work->team;
+
+            $string = 'einsatz';
+            $filename = "{$date}-{$string}-{$team}.pdf";
+            $path = $request->file('pdf')->storeAs(self::PDF_DIRECTORY, $filename, 'public');
+
+            // Update the work's pdf field with the path of the stored file
+            $work->pdf_file = $path;
+            $work->save();
+
+            return $this->success(trans('messages.work.pdf.upload.success'), $work);
+        }
+        catch (\Exception $e) {
+            Log::error("storePdf() function error-server: $e");
+            return $this->error(__('messages.work.pdf.upload.failed'), null);
         }
 
-        // Validate the request to ensure a file was uploaded
-        $request->validate([
-            'pdf' => 'required|mimes:pdf|max:2048', // 2MB Max
-        ]);
-
-        // Format the date to 'YYYY-MM-DD'
-        $date = Carbon::parse($work->date)->format('Y-m-d');
-
-
-        $team = $work->team;
-
-        $string = 'einsatz';
-        $filename = "{$date}-{$string}-{$team}.pdf";
-        $path = $request->file('pdf')->storeAs('pdfs', $filename, 'local');
-
-        // Update the work's pdf field with the path of the stored file
-        $work->pdf_file = $path;
-        $work->save();
-
-        return $this->success(trans('messages.work.pdf.upload.success'), $work);
     }
-
     public function getAdminAllWorks(Request $request)
     {
         try {
@@ -308,11 +332,11 @@ class WorkController
             ];
             return $this->success(trans('messages.work.fetch.success'), $worksData, $pagination);
         } catch (\Exception $e) {
-            return $this->error(__('messages.work.fetch.failed'), null);
+            Log::error("getAdminAllWorks() function error-server: $e");
+            return $this->error(__('messages.server_error'), null);
         }
 
     }
-
     public function getWorksByTeam(Request $request, $team)
     {
         try {
@@ -356,11 +380,10 @@ class WorkController
             }
 
         } catch (\Exception $e) {
-            return $this->error(__('messages.work.fetch.by_team.failed'), null);
-//            return $this->error($e->getMessage(), null);
+            Log::error("getWorksByTeam() function error-server: $e");
+            return $this->error(__('messages.server_error'), null);
         }
     }
-
     public function GetNumberOfWorks()
     {
         try {
@@ -370,11 +393,11 @@ class WorkController
 
             return $this->success(trans('messages.work.count.all.success'), $works->count());
         } catch (\Exception $e) {
-            return $this->error(__('messages.work.count.all.failed'), null);
+            Log::error("GetNumberOfWorks() function error-server: $e");
+            return $this->error(__('messages.server_error'), null);
         }
 
     }
-
     public function GetNumberOfStandingWorks()
     {
         try {
@@ -385,24 +408,25 @@ class WorkController
 
             return $this->success(trans('messages.work.count.standing.success'), $works->count());
         } catch (\Exception $e) {
-            return $this->error(__('messages.work.count.standing.failed'), null);
+            Log::error("GetNumberOfStandingWorks() function error-server: $e");
+            return $this->error(__('messages.server_error'), null);
         }
     }
-
     public function download($filename)
     {
         try {
+            $path = self::PDF_DIRECTORY."/". $filename;
 
-            $path = 'pdfs/' . $filename;
-
-            if (!Storage::disk('local')->exists($path)) {
-                return $this->success(trans('messages.work.pdf.download.success'), null);
-
+            if (!Storage::disk('public')->exists($path)) {
+                return $this->error(trans('messages.work.pdf.download.failed'), $path);
             }
-           return response()->download(storage_path('app/private/' . $path), $filename);
-        } catch (\Exception $e) {
-//            return $this->error($e->getMessage(), null);
-            return $this->error(__('messages.work.pdf.download.failed'), null);
+
+            return Storage::disk('public')->download($path);
+//           return response()->download(storage_path('app/public/' . $path), $filename);8
+        }
+        catch (\Exception $e) {
+            Log::error("Downloading Work PDF error-server: $e");
+            return $this->error(__('messages.server_error'), null);
         }
     }
 }
