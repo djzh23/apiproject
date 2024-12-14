@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use function Symfony\Component\Translation\t;
 
 class WorkController
 {
@@ -311,6 +312,7 @@ class WorkController
         }
 
     }
+
     public function getWorksByTeam(Request $request, $team)
     {
         try {
@@ -349,8 +351,7 @@ class WorkController
                     'path' => $works->path(),
                 ];
                 return $this->success(trans('messages.work.fetch.by_team.success'), $worksData, $pagination);
-            }
-            else{
+            } else {
                 return $this->success(trans('messages.work.fetch.by_team.empty'), null);
             }
 
@@ -359,44 +360,49 @@ class WorkController
 //            return $this->error($e->getMessage(), null);
         }
     }
+
     public function GetNumberOfWorks()
     {
-        try{
+        try {
             $userId = Auth::id();
             // Get only the Works that belong to the authenticated user
             $works = Work::where('creator_id', $userId)->get();
 
             return $this->success(trans('messages.work.count.all.success'), $works->count());
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return $this->error(__('messages.work.count.all.failed'), null);
         }
 
     }
+
     public function GetNumberOfStandingWorks()
     {
-        try{
+        try {
             $userId = Auth::id(); // Get the ID of the authenticated user
 
             // Get only the Works that belong to the authenticated user
             $works = Work::where('creator_id', $userId)->where('status', 'standing')->get();
 
             return $this->success(trans('messages.work.count.standing.success'), $works->count());
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return $this->error(__('messages.work.count.standing.failed'), null);
         }
     }
+
     public function download($filename)
     {
-        $path = 'pdfs/' . $filename;
+        try {
 
-        if (!Storage::disk('public')->exists($path)) {
-            return $this->success(trans('messages.work.pdf.download.success'), null);
-//            return response()->json(['error' => 'file not found'], 404);
+            $path = 'pdfs/' . $filename;
+
+            if (!Storage::disk('local')->exists($path)) {
+                return $this->success(trans('messages.work.pdf.download.success'), null);
+
+            }
+           return response()->download(storage_path('app/private/' . $path), $filename);
+        } catch (\Exception $e) {
+//            return $this->error($e->getMessage(), null);
+            return $this->error(__('messages.work.pdf.download.failed'), null);
         }
-
-        return response()->download(storage_path('app/' . $path), $filename);
     }
-
 }
