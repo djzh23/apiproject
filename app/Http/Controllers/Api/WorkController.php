@@ -412,7 +412,7 @@ class WorkController
             return $this->error(__('messages.server_error'), null);
         }
     }
-    public function download($filename)
+    public function download_($filename)
     {
         try {
             $path = self::PDF_DIRECTORY."/". $filename;
@@ -428,5 +428,26 @@ class WorkController
             Log::error("Downloading Work PDF error-server: $e");
             return $this->error(__('messages.server_error'), null);
         }
+    }
+    public function download($id)
+    {
+        try {
+            $work = Work::find($id);
+
+            if (!$work) {
+                return $this->error(__('messages.work.pdf.download.failed'), null);
+            }
+            $path = $work->pdf_file;
+
+            if (!Storage::disk('public')->exists($path)) {
+                return $this->error(trans('messages.work.pdf.download.failed'), $path);
+            }
+
+            return Storage::disk('public')->download($path);
+        } catch (\Exception $e) {
+            Log::error("Downloading Work PDF error-server: $e");
+            return $this->error(__('messages.server_error'), null);
+        }
+
     }
 }
