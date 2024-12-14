@@ -38,7 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/billings', [BillingController::class, 'getAllUserBillings']);
     Route::get('/billings/{month}', [BillingController::class, 'getBillsByMonth']);
     Route::get('/billings/download/{filename}', [BillingController::class, 'download'])
-        ->name('pdf.download')
+        ->name('pdf.downloadBillings')
         ->middleware('throttle:60,1', 'auth:sanctum');
 
     Route::get('/billings/count/created', [BillingController::class, 'getNumberOfBills']);

@@ -212,7 +212,7 @@ class BillingController extends BaseController
     {
         $path = 'billings-pdfs/' . $filename;
 
-        if (!Storage::disk('local')->exists($path)) {
+        if (!Storage::disk('public')->exists($path)) {
             return $this->success(trans('messages.billing.pdf.download.failed'), null);
         }
 
