@@ -102,8 +102,9 @@ class BillingController extends BaseController
         $date = date('Y-m-d'); // You can replace this with the actual date from the bill
         $month = $bill->month; // Replace this with the actual month from the bill
         $string = 'rechnung';
+        $number = $bill->billing_number;
         $type = $bill->isvorort ? '' : 'ausflug';
-        $filename = "{$date}-{$month}-{$type}-{$string}.pdf";
+        $filename = "{$date}-{$month}-{$type}-{$string}-{$number}.pdf";
 
         // Store the uploaded pdf file with the custom filename and get its path
         $path = $request->file('pdf')->storeAs('billings-pdfs', $filename, 'public');
@@ -123,6 +124,7 @@ class BillingController extends BaseController
         // Get only the Works that belong to the authenticated user
         $perpage = 10;
         $billings = Billing::where('user_id', $userId)
+            ->latest('created_at')
             ->paginate($perpage); // Change '10' to however many works per page you want
 
 
@@ -166,6 +168,7 @@ class BillingController extends BaseController
             $perpage = 10;
             $billings = Billing::where('user_id', $request->user()->id)
                 ->where('month', $month)
+                ->latest('created_at')
                 ->select(['id', 'billing_number', 'date', 'month', 'team', 'somme_all', 'isvorort', 'pdf_file'])
                 ->paginate($perpage);
 
@@ -222,7 +225,9 @@ class BillingController extends BaseController
     {
         $userId = $request->user()->id;
 
-        $bills = Billing::where('user_id', $userId)->whereNotNull('pdf_file')->get();
+        $bills = Billing::where('user_id', $userId)->whereNotNull('pdf_file')
+                            ->latest('created_at')
+                            ->get();
 
 
         if ($bills->isEmpty()) {
