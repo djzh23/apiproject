@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Work;
 use App\Traits\ApiResponses;
+use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -224,10 +225,12 @@ class WorkController
         ]);
 
         // Format the date to 'YYYY-MM-DD'
-        $date = \Carbon\Carbon::parse($work->date)->format('Y-m-d');
+        $date = Carbon::parse($work->date)->format('Y-m-d');
+
+
+        $team = $work->team;
 
         $string = 'einsatz';
-        $team = $work->team;
         $filename = "{$date}-{$string}-{$team}.pdf";
         $path = $request->file('pdf')->storeAs('pdfs', $filename, 'local');
 
@@ -308,7 +311,6 @@ class WorkController
         }
 
     }
-
     public function getWorksByTeam(Request $request, $team)
     {
         try {
@@ -357,7 +359,6 @@ class WorkController
 //            return $this->error($e->getMessage(), null);
         }
     }
-
     public function GetNumberOfWorks()
     {
         try{
@@ -372,7 +373,6 @@ class WorkController
         }
 
     }
-
     public function GetNumberOfStandingWorks()
     {
         try{
@@ -387,16 +387,16 @@ class WorkController
             return $this->error(__('messages.work.count.standing.failed'), null);
         }
     }
+    public function download($filename)
+    {
+        $path = 'pdfs/' . $filename;
 
-//    public function download($filename)
-//    {
-//        $path = 'pdfs/' . $filename;
-//
-//        if (!Storage::disk('local')->exists($path)) {
+        if (!Storage::disk('public')->exists($path)) {
+            return $this->success(trans('messages.work.pdf.download.success'), null);
 //            return response()->json(['error' => 'file not found'], 404);
-//        }
-//
-//        return response()->download(storage_path('app/' . $path), $filename);
-//    }
+        }
+
+        return response()->download(storage_path('app/' . $path), $filename);
+    }
 
 }

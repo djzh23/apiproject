@@ -102,7 +102,6 @@ class BillingController extends BaseController
         $date = date('Y-m-d'); // You can replace this with the actual date from the bill
         $month = $bill->month; // Replace this with the actual month from the bill
         $string = 'rechnung';
-
         $type = $bill->isvorort ? '' : 'ausflug';
         $filename = "{$date}-{$month}-{$type}-{$string}.pdf";
 
@@ -213,7 +212,7 @@ class BillingController extends BaseController
     {
         $path = 'billings-pdfs/' . $filename;
 
-        if (!Storage::disk('public')->exists($path)) {
+        if (!Storage::disk('local')->exists($path)) {
             return $this->success(trans('messages.billing.pdf.download.failed'), null);
         }
 

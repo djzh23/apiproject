@@ -23,6 +23,7 @@ class SuperAdminController
                     'lastname' => $user->lastname,
                     'email' => $user->email,
                     'role_id' => $user->role_id,
+                    'role' => $user->role,
                     'city' => $user->city,
                     'country' => $user->country,
                     'approved' => (bool)$user->approved,
