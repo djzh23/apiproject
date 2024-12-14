@@ -102,7 +102,6 @@ class BillingController extends BaseController
         $date = date('Y-m-d'); // You can replace this with the actual date from the bill
         $month = $bill->month; // Replace this with the actual month from the bill
         $string = 'rechnung';
-
         $type = $bill->isvorort ? '' : 'ausflug';
         $filename = "{$date}-{$month}-{$type}-{$string}.pdf";
 
