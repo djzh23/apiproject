@@ -47,7 +47,8 @@ class BillingController extends BaseController
     public function download($id)
     {
         try{
-            $bill = Billing::find($id);
+//            $bill = Billing::find($id);
+            $bill = Billing::where('billing_number', $id)->first();
 
             if (!$bill) {
                 return $this->error(__('messages.billing.pdf.download.failed'), null);
