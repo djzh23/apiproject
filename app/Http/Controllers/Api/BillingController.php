@@ -184,7 +184,7 @@ class BillingController extends BaseController
                 ];
             });
             if($billingsData->isEmpty()){
-                return $this->error(__('messages.billing.fetch.not_found'), null);
+                return $this->success(__('messages.billing.fetch.not_found'), null);
             }
 
             $pagination = [
