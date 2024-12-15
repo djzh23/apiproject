@@ -269,6 +269,8 @@ class WorkController
     public function getAdminAllWorks(Request $request)
     {
         try {
+            $userId = auth()->id();
+
             // Get filter parameters from the request
             $team = $request->input('team');
 
@@ -280,7 +282,8 @@ class WorkController
             }
 
             // Order by created_at in descending order to get the last added works first and paginate the results
-            $works = $query->orderBy('created_at', 'desc')->paginate(25);
+            $works = $query->where('creator_id', '!=', $userId)
+                ->orderBy('created_at', 'desc')->paginate(25);
 
             // Transform the data to make it more readable
             $worksData = $works->map(function ($work) {
