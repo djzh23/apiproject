@@ -137,7 +137,7 @@ class BillingController extends BaseController
             $string = 'rechnung';
             $number = $bill->billing_number;
 //            $filename = "{$date}-{$month}-{$string}-{$number}.pdf";
-            $filename = "{$string}-{$number}-{$month}-{$user_name}-{$date}-.pdf";
+            $filename = "{$string}-{$number}-{$month}-{$user_name}-{$date}.pdf";
 
             // Store the uploaded pdf file with the custom filename and get its path
             $path = $request->file('pdf')->storeAs('billings-pdfs', $filename, 'public');
