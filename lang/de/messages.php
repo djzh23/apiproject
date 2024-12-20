@@ -120,6 +120,7 @@ return [
             'success' => 'Einsatzt erfolgreich erstellt.',
             'failed' => 'Einsatz konnte nicht erstellt werden.',
             'validation_failed' => 'Die Validierung hat fehlgeschlagen, bitte die Eingabe prüfen .',
+            'unique_work_validation_failed' => 'Für dieses Datum ist bereits ein Einsatz mit demselben Team gespeichert. Bitte prüfen Sie die Eingaben.',
         ],
         'fetch' => [
             'success' => 'Einsätze wurden erfolgreich geladen.',

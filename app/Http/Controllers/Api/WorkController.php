@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use function Symfony\Component\Translation\t;
 
@@ -43,8 +44,25 @@ class WorkController
             ]);
 
             if ($validator->fails()) {
-                Log::error('Job creation validation failed: ' . $validator->errors());
+                Log::error('Unique Work creation validation failed: ' . $validator->errors());
                 return $this->error(__('messages.work.create.validation_failed'), null);
+            }
+
+            try{
+                $request->validate([
+                    'date' => [
+                        'required',
+                        'date_format:d-m-Y,Y-m-d',
+                        Rule::unique('works')
+                            ->where(function ($query) use ($request) {
+                                return $query->where('team', $request->team);
+                            })
+                    ],
+                ]);
+            }
+            catch (\Exception $e) {
+                Log::error("preview() function error-server: $e");
+                return $this->error(trans('messages.work.create.unique_work_validation_failed'), null);
             }
 
             // If validation passes, get the validated data
@@ -346,6 +364,7 @@ class WorkController
             // Get only the Bill that belong to the authenticated user
             $perpage = 10;
             $works = Work::where('team', $team)
+                ->whereNot('creator_id', auth()->id())
                 ->where('status', 'complete')
                 ->whereNotNull('pdf_file')
                 ->orderBy('created_at', 'desc')
