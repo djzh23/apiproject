@@ -89,6 +89,7 @@ return [
             'upload' => [
                 'success' => 'PDF erfolgreich hochgeladen.',
                 'failed' => 'PDF konnte nicht hochgeladen werden.',
+                'failed_pdf' => 'PDF ist bereit hochgeladen.',
             ],
             'download' => [
                 'success' => 'PDF erfolgreich heruntergeladen.',

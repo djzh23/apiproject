@@ -36,6 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/billings/preview', [BillingController::class, 'preview']);
     Route::post('/billings/{id}/pdf', [BillingController::class, 'storeBillPdf']);
     Route::get('/billings', [BillingController::class, 'getAllUserBillings']);
+    Route::get('/billings/allusers', [BillingController::class, 'getAdminAllBillings'])->middleware('admin');
+    Route::get('/billings/allusers/{month}', [BillingController::class, 'getAdminBillsByMonth'])->middleware('admin');
     Route::get('/billings/{month}', [BillingController::class, 'getBillsByMonth']);
 //    Route::get('/billings/download/{filename}', [BillingController::class, 'download'])
 //        ->name('pdf.downloadBillings')

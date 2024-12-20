@@ -29,7 +29,7 @@ class WorkController
     {
         Storage::disk('public')->makeDirectory(self::PDF_DIRECTORY);
     }
-    public function creatework(Request $request)
+    public function creatework(Request $request): JsonResponse
     {
         try{
             $validator = Validator::make($request->all(), [
@@ -266,7 +266,7 @@ class WorkController
         }
 
     }
-    public function getAdminAllWorks(Request $request)
+    public function getAdminAllWorks(Request $request): JsonResponse
     {
         try {
             $userId = auth()->id();
@@ -340,7 +340,7 @@ class WorkController
         }
 
     }
-    public function getWorksByTeam(Request $request, $team)
+    public function getWorksByTeam(Request $request, $team): JsonResponse
     {
         try {
             // Get only the Bill that belong to the authenticated user
@@ -387,7 +387,7 @@ class WorkController
             return $this->error(__('messages.server_error'), null);
         }
     }
-    public function GetNumberOfWorks()
+    public function GetNumberOfWorks(): JsonResponse
     {
         try {
             $userId = Auth::id();
@@ -401,7 +401,7 @@ class WorkController
         }
 
     }
-    public function GetNumberOfStandingWorks()
+    public function GetNumberOfStandingWorks(): JsonResponse
     {
         try {
             $userId = Auth::id(); // Get the ID of the authenticated user
@@ -412,23 +412,6 @@ class WorkController
             return $this->success(trans('messages.work.count.standing.success'), $works->count());
         } catch (\Exception $e) {
             Log::error("GetNumberOfStandingWorks() function error-server: $e");
-            return $this->error(__('messages.server_error'), null);
-        }
-    }
-    public function download_($filename)
-    {
-        try {
-            $path = self::PDF_DIRECTORY."/". $filename;
-
-            if (!Storage::disk('public')->exists($path)) {
-                return $this->error(trans('messages.work.pdf.download.failed'), $path);
-            }
-
-            return Storage::disk('public')->download($path);
-//           return response()->download(storage_path('app/public/' . $path), $filename);8
-        }
-        catch (\Exception $e) {
-            Log::error("Downloading Work PDF error-server: $e");
             return $this->error(__('messages.server_error'), null);
         }
     }
