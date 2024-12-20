@@ -20,10 +20,8 @@ class Billing extends Model
         'month',
         'billing_number',
         'billing_details',
-        'team',
         'somme_all',
         'pdf_file',
-        'isvorort',
     ];
 
     /**
