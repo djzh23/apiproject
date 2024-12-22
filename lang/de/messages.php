@@ -138,6 +138,13 @@ return [
             'validation_failed' => 'Die Validierung hat fehlgeschlagen, bitte die Eingabe prüfen .',
             'not_found' => 'Einsatz wurde nicht gefunden.',
         ],
+        'complete' => [
+            'success' => 'Einsatz wurde erfolgreich abgeschlossen.',
+            'failed' => 'Einsatz konnte nicht abgeschlossen werden.',
+            'validation_failed' => 'Die Validierung hat fehlgeschlagen, bitte die Eingabe prüfen .',
+            'not_found' => 'Einsatz wurde nicht gefunden.',
+            'pdf_required' => 'Das pdf Feld ist erforderlich.',
+        ],
         'pdf' =>[
             'upload' => [
                 'success' => 'PDF erfolgreich erstellt.',

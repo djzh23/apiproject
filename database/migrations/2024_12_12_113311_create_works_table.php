@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('works', function (Blueprint $table) {
             $table->id();
             $table->foreignId('creator_id')->constrained('users');
-            $table->enum('status', ['standing', 'complete'])->default('standing');
+            $table->enum('status', ['standing','complete',])->default('standing');
             $table->date('date');
             $table->string('team');
             $table->string('ort');
