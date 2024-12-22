@@ -54,6 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/work', [WorkController::class, 'creatework']);
     Route::get('/works', [WorkController::class, 'getAllWorks']);
     Route::put('/works/{id}', [WorkController::class, 'updateWork']);
+    Route::post('/works/{id}/complete', [WorkController::class, 'completeWork']);
     Route::post('/works/{id}/pdf', [WorkController::class, 'storePdf']);
     Route::get('/works/allusers', [WorkController::class, 'getAdminAllWorks'])->middleware('admin');
     Route::get('/works/{team}', [WorkController::class, 'getWorksByTeam'])->middleware('admin');

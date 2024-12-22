@@ -168,37 +168,29 @@ class WorkController
 
             // Validate the incoming request data
             $validator = Validator::make($request->all(), [
-                'date' => 'sometimes|required|date',
-                'start_work' => 'sometimes|required|date_format:H:i',
-                'team' => 'sometimes|required|string',
-                'ort' => 'sometimes|required|string',
-                'vorort' => 'sometimes|required|boolean',
+                'date' => 'sometimes|nullable|date',
+                'start_work' => 'sometimes|nullable|date_format:H:i',
+                'team' => 'sometimes|nullable|string',
+                'ort' => 'sometimes|nullable|string',
+                'vorort' => 'sometimes|nullable|boolean',
                 'list_of_helpers' => 'sometimes|nullable|array',
-                'plan' => 'sometimes|required|string',
-
-
-                'reflection' => 'sometimes|required|string',
-
+                'plan' => 'sometimes|nullable|string',
+                'reflection' => 'sometimes|nullable|string',
                 'defect' => 'sometimes|nullable|string',
                 'parent_contact' => 'sometimes|nullable|string',
-
                 'wellbeing_of_children' => 'sometimes|nullable|string',
-
                 'notes' => 'sometimes|nullable|string',
                 'wishes' => 'sometimes|nullable|string',
-
-
-                'end_work' => 'sometimes|required|date_format:H:i',
-
-                'kids_data' => 'sometimes|required|array',
+                'end_work' => 'sometimes|nullable|date_format:H:i',
+                'kids_data' => 'sometimes|nullable|array',
                 'kids_data.*.age_group_id' => 'required_with:kids_data|integer|exists:age_groups,id',
                 'kids_data.*.boys' => 'required_with:kids_data|integer|min:0',
                 'kids_data.*.girls' => 'required_with:kids_data|integer|min:0',
-                // Add validation rules for other fields in the FullWork model
             ]);
 
             if ($validator->fails()) {
-                return $this->error(__('messages.work.update.validation_failed'), null);
+                Log::error('Unique Work update validation failed: ' . $validator->errors());
+                return $this->error(__('messages.work.update.validation_failed'), $validator->errors());
             }
 
             // If validation passes, get the validated data
@@ -220,31 +212,122 @@ class WorkController
                 $work->ageGroups()->sync($syncData);
             }
 
-            $requiredFields = ['plan', 'reflection']; // Add all your required fields here
-            $allFieldsFilled = true;
-
-            foreach ($requiredFields as $field) {
-                if (empty($work->$field)) {
-                    $allFieldsFilled = false;
-                    break;
-                }
-            }
-
-            // Update status based on field values
-            if ($allFieldsFilled) {
-                $work->status = 'complete';
-            } else {
-                $work->status = 'standing';
-            }
-
+            $work->status = 'inprogress';
             $work->save();
 
             return $this->success(trans('messages.work.update.success'), $work);
         }
         catch (\Exception $e) {
             Log::error("updateWork() function error-server: $e");
-            return $this->error(__('messages.server_error'), null);
+            return $this->error(__('messages.server_error'), $e->getMessage());
         }
+    }
+    public function completeWork(Request $request, $id): JsonResponse
+    {
+        try {
+            Log::info('Complete Work Request:', [
+                'method' => $request->method(),
+                'real_method' => $request->getRealMethod(),
+                'content_type' => $request->header('Content-Type'),
+                'all_input' => $request->all(),
+                'has_data' => $request->has('data'),
+                'data_input' => $request->input('data'),
+                'files' => $request->allFiles(),
+                'has_file' => $request->hasFile('pdf')
+            ]);
+
+            // Find the work by its id
+            $work = Work::find($id);
+
+            // If the work doesn't exist, return an error response
+            if (!$work) {
+                return $this->error(__('messages.work.complete.not_found'), null);
+            }
+
+            // Validate request
+            $validatedData = $request->validate([
+                'data' => 'required|json',
+                'pdf' => 'required|file|mimes:pdf|max:2048'
+            ]);
+            if (!$validatedData) {
+                return $this->error(trans('messages.work.complete.validation_failed'), null);
+            }
+
+            // Parse data
+            $data = json_decode($request->input('data'), true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \Exception('Invalid JSON data: ' . json_last_error_msg());
+            }
+
+            // Validate the incoming request data
+            $validator = Validator::make($data, [
+                'date' => 'required|date',
+                'start_work' => 'date_format:H:i',
+                'team' => 'string',
+                'ort' => 'string',
+                'vorort' => 'required|boolean',
+                'list_of_helpers' => 'nullable|array',
+                'plan' => 'required|string',
+                'reflection' => 'required|string',
+                'defect' => 'sometimes|nullable|string',
+                'parent_contact' => 'sometimes|nullable|string',
+                'wellbeing_of_children' => 'sometimes|nullable|string',
+                'notes' => 'sometimes|nullable|string',
+                'wishes' => 'sometimes|nullable|string',
+                'end_work' => 'required|date_format:H:i',
+                'kids_data' => 'sometimes|required|array',
+                'kids_data.*.age_group_id' => 'required_with:kids_data|integer|exists:age_groups,id',
+                'kids_data.*.boys' => 'required_with:kids_data|integer|min:0',
+                'kids_data.*.girls' => 'required_with:kids_data|integer|min:0'
+            ]);
+            if ($validator->fails()) {
+                Log::error('Complete Work validation failed: ' . $validator->errors());
+                return $this->error(__('messages.work.complete.validation_failed'), $validator->errors());
+            }
+
+            // If validation passes, get the validated data
+            $validatedData = $validator->validated();
+
+            // Update the work with the validated data
+            $work->update($validatedData);
+
+            // Update kids data in the pivot table if provided
+            if ($request->has('kids_data')) {
+                $kidsData = $request->input('kids_data');
+                $syncData = [];
+                foreach ($kidsData as $kid) {
+                    $syncData[$kid['age_group_id']] = [
+                        'boys' => $kid['boys'],
+                        'girls' => $kid['girls'],
+                    ];
+                }
+                $work->ageGroups()->sync($syncData);
+            }
+
+            if ($request->hasFile('pdf')) {
+                // Format the date to 'YYYY-MM-DD'
+                $date = Carbon::parse($work->date)->format('Y-m-d');
+                $team = $work->team;
+                $string = 'einsatz';
+                $filename = "{$date}-{$string}-{$team}.pdf";
+                $path = $request->file('pdf')->storeAs(self::PDF_DIRECTORY, $filename, 'public');
+
+                // Update the work's pdf field with the path of the stored file
+                Log::info("pdf_file: $path");
+                $work->pdf_file = $path;
+            }
+
+            // Update status
+            $work->status = 'complete';
+            $work->save();
+
+            return $this->success(trans('messages.work.complete.success'), $work);
+        }
+        catch (\Exception $e) {
+            Log::error("completeWork() function error-server: $e");
+            return $this->error(__('messages.work.complete.failed'), $e);
+        }
+
     }
     public function storePdf(Request $request, $id): JsonResponse
     {
@@ -264,10 +347,7 @@ class WorkController
 
             // Format the date to 'YYYY-MM-DD'
             $date = Carbon::parse($work->date)->format('Y-m-d');
-
-
             $team = $work->team;
-
             $string = 'einsatz';
             $filename = "{$date}-{$string}-{$team}.pdf";
             $path = $request->file('pdf')->storeAs(self::PDF_DIRECTORY, $filename, 'public');
