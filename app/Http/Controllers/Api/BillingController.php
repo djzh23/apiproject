@@ -33,7 +33,8 @@ class BillingController extends BaseController
     {
         try{
 //            $bill = Billing::find($id);
-            $bill = Billing::where('billing_number', $id)->first();
+//            $bill = Billing::where('billing_number', $id)->first();
+            $bill = Billing::where('id', $id)->first();
 
             if (!$bill) {
                 return $this->error(__('messages.billing.pdf.download.failed'), null);
@@ -115,8 +116,12 @@ class BillingController extends BaseController
     public function storeBillPdf(Request $request, $id): JsonResponse
     {
         try{
-            $bill = Billing::find($id)->where('user_id', auth()->id())->first();
-
+//            $bill = Billing::find($id)->where('user_id', auth()->id())->all();
+            $bill = Billing::where('id', $id)
+                ->where('user_id', auth()->id())
+                ->first();
+//            $bill = Billing::find($id)->where('user_id', auth()->id())->first();
+            Log::info("storeBillPdf function error-server: $bill");
             if (!$bill) {
                 return $this->error(__('messages.billing.pdf.upload.failed'), null);
             }

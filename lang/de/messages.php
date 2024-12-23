@@ -19,6 +19,7 @@ return [
         'no_permission' => 'Keine Berechtigung.',
         'approved' => 'Benutzer wurde erfolgreich aktiviert.',
         'failure_approve' => 'Benutzer konnte nicht aktiviert werden.',
+        'failure_notification_email' => 'Email konnte nicht gesendet werden.',
         'disapproved' => 'Benutzer wurde erfolgreich deaktiviert.',
         'failure_disapprove' => 'Benutzer konnte nicht deaktiviert werden.',
         'users_found' => 'Benutzer gefunden.',
