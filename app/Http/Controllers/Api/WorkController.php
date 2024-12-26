@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use function Symfony\Component\Translation\t;
+use Illuminate\Support\Arr;
 
 class WorkController
 {
@@ -225,17 +226,6 @@ class WorkController
     public function completeWork(Request $request, $id): JsonResponse
     {
         try {
-            Log::info('Complete Work Request:', [
-                'method' => $request->method(),
-                'real_method' => $request->getRealMethod(),
-                'content_type' => $request->header('Content-Type'),
-                'all_input' => $request->all(),
-                'has_data' => $request->has('data'),
-                'data_input' => $request->input('data'),
-                'files' => $request->allFiles(),
-                'has_file' => $request->hasFile('pdf')
-            ]);
-
             // Find the work by its id
             $work = Work::find($id);
 
@@ -292,8 +282,8 @@ class WorkController
             $work->update($validatedData);
 
             // Update kids data in the pivot table if provided
-            if ($request->has('kids_data')) {
-                $kidsData = $request->input('kids_data');
+            $kidsData = Arr::get($data, 'kids_data', null);
+            if ($kidsData != null) {
                 $syncData = [];
                 foreach ($kidsData as $kid) {
                     $syncData[$kid['age_group_id']] = [
@@ -313,7 +303,6 @@ class WorkController
                 $path = $request->file('pdf')->storeAs(self::PDF_DIRECTORY, $filename, 'public');
 
                 // Update the work's pdf field with the path of the stored file
-                Log::info("pdf_file: $path");
                 $work->pdf_file = $path;
             }
 
@@ -367,8 +356,6 @@ class WorkController
     public function getAdminAllWorks(Request $request): JsonResponse
     {
         try {
-            $userId = auth()->id();
-
             // Get filter parameters from the request
             $team = $request->input('team');
 
@@ -380,8 +367,7 @@ class WorkController
             }
 
             // Order by created_at in descending order to get the last added works first and paginate the results
-            $works = $query->where('creator_id', '!=', $userId)
-                ->orderBy('created_at', 'desc')->paginate(25);
+            $works = $query->orderBy('created_at', 'desc')->paginate(10);
 
             // Transform the data to make it more readable
             $worksData = $works->map(function ($work) {
@@ -486,7 +472,7 @@ class WorkController
             return $this->error(__('messages.server_error'), null);
         }
     }
-    public function GetNumberOfWorks(): JsonResponse
+    public function GetTotalNumberOfWorks(): JsonResponse
     {
         try {
             $userId = Auth::id();
@@ -500,17 +486,17 @@ class WorkController
         }
 
     }
-    public function GetNumberOfStandingWorks(): JsonResponse
+    public function GetNumberOfIncompleteWorks(): JsonResponse
     {
         try {
             $userId = Auth::id(); // Get the ID of the authenticated user
 
             // Get only the Works that belong to the authenticated user
-            $works = Work::where('creator_id', $userId)->where('status', 'standing')->get();
+            $works = Work::where('creator_id', $userId)->whereIn('status', ['standing', 'inprogress'])->get();
 
             return $this->success(trans('messages.work.count.standing.success'), $works->count());
         } catch (\Exception $e) {
-            Log::error("GetNumberOfStandingWorks() function error-server: $e");
+            Log::error("GetNumberOfIncompleteWorks() function error-server: $e");
             return $this->error(__('messages.server_error'), null);
         }
     }

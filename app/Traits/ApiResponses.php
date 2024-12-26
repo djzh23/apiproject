@@ -8,7 +8,6 @@ trait ApiResponses
     {
         return response()->json(['success' => true,'message' => $message, 'data' => $data, 'pagination' => $pagination],200);
     }
-
     public function error($message, $data)
     {
         return response()->json(['success' => false,'message' => $message, 'data' => $data],400);

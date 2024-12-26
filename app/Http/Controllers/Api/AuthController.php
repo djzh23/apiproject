@@ -28,6 +28,7 @@ use Nembie\IbanRule\ValidIban;
 class AuthController extends BaseController
 {
     use ApiResponses;
+
     public function register(Request $request): JsonResponse
     {
         try{
@@ -95,6 +96,7 @@ class AuthController extends BaseController
         }
 
     }
+
     public function login(Request $request): JsonResponse
     {
         try {
@@ -172,6 +174,7 @@ class AuthController extends BaseController
             return $this->error(__('messages.server_error'), null);
         }
     }
+
     public function logout(Request $request): JsonResponse
     {
         try{
@@ -184,6 +187,7 @@ class AuthController extends BaseController
             return $this->error(__('messages.server_error'), null);
         }
     }
+
     public function forgotPassword(Request $request): JsonResponse
     {
         try{
@@ -210,6 +214,7 @@ class AuthController extends BaseController
         }
 
     }
+
     public function resetPassword(Request $request): JsonResponse
     {
         try{
@@ -244,6 +249,7 @@ class AuthController extends BaseController
         }
 
     }
+
     public function update(Request $request): JsonResponse
     {
         try{
@@ -298,6 +304,7 @@ class AuthController extends BaseController
         }
 
     }
+
     public function getProfile(): JsonResponse
     {
         try{
@@ -315,6 +322,7 @@ class AuthController extends BaseController
         }
 
     }
+
     public function user(Request $request): JsonResponse
     {
         return response()->json([

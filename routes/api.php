@@ -16,7 +16,6 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 // Protected API routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-//    Route::get('/user', [AuthController::class, 'user']);
     Route::put('/user', [AuthController::class, 'update']);
     Route::get('/user', [AuthController::class, 'getProfile']);
 });
@@ -26,27 +25,34 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'superadmin'])->group(function () {
     Route::put('/approve/{userId}', [SuperAdminController::class, 'approve']);
     Route::put('/disapprove/{userId}', [SuperAdminController::class, 'disapprove']);
+    Route::put('/changeRole/{userId}', [SuperAdminController::class, 'changeRole']);
     Route::get('/users', [SuperAdminController::class, 'getAllUsers']);
 });
 
+// to be deleted, not used in front end
 Route::get('billings/pdfs', [BillingController::class, 'listOfBillsPdfs'])->middleware('auth:sanctum');
-//// Billings API routes
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/billings/create', [BillingController::class, 'store']);
-    Route::post('/billings/preview', [BillingController::class, 'preview']);
-    Route::post('/billings/{id}/pdf', [BillingController::class, 'storeBillPdf']);
-    Route::get('/billings', [BillingController::class, 'getAllUserBillings']);
+
+// Billings API routes authorized to honorar only
+Route::middleware(['auth:sanctum', 'honorar'])->group(function () {
+    Route::post('/billings/create', [BillingController::class, 'store'])->middleware('honorar');
+    Route::post('/billings/preview', [BillingController::class, 'preview'])->middleware('honorar');
+    Route::post('/billings/{id}/pdf', [BillingController::class, 'storeBillPdf'])->middleware('honorar');
+    Route::get('/billings', [BillingController::class, 'getBillings'])->middleware('honorar');
+    Route::get('/billings/{month}', [BillingController::class, 'getBillsByMonth'])->middleware('honorar');
+    Route::get('/billings/count/created', [BillingController::class, 'getNumberOfBills']);
+});
+
+// Billings API routes authorized to admin only
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/billings/allusers', [BillingController::class, 'getAdminAllBillings'])->middleware('admin');
     Route::get('/billings/allusers/{month}', [BillingController::class, 'getAdminBillsByMonth'])->middleware('admin');
-    Route::get('/billings/{month}', [BillingController::class, 'getBillsByMonth']);
-//    Route::get('/billings/download/{filename}', [BillingController::class, 'download'])
-//        ->name('pdf.downloadBillings')
-//        ->middleware('throttle:60,1', 'auth:sanctum');
+});
+
+// Billings API routes authorized to both honorar and admin
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/billings/download/{id}', [BillingController::class, 'download'])
         ->name('pdf.downloadBillings')
-        ->middleware('throttle:60,1', 'auth:sanctum');
-
-    Route::get('/billings/count/created', [BillingController::class, 'getNumberOfBills']);
+        ->middleware('throttle:60,1');
 });
 
 // Works API routes
@@ -58,20 +64,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/works/{id}/pdf', [WorkController::class, 'storePdf']);
     Route::get('/works/allusers', [WorkController::class, 'getAdminAllWorks'])->middleware('admin');
     Route::get('/works/{team}', [WorkController::class, 'getWorksByTeam'])->middleware('admin');
-
-    Route::get('/works/count/created', [WorkController::class, 'GetNumberOfWorks']);
-    Route::get('/works/count/standing', [WorkController::class, 'GetNumberOfStandingWorks']);
+    Route::get('/works/count/created', [WorkController::class, 'GetTotalNumberOfWorks']);
+    Route::get('/works/count/incomplete', [WorkController::class, 'GetNumberOfIncompleteWorks']);
     Route::get('/works/download/{id}', [WorkController::class, 'download'])
         ->name('pdf.download')
         ->middleware('throttle:60,1', 'auth:sanctum');
-//    Route::get('/works/download/{filename}', [WorkController::class, 'download'])
-//        ->name('pdf.download')
-//        ->middleware('throttle:60,1');
 });
-
-
-
-//Route::get('/countbillscreated', [BillingController::class, 'getNumberOfBills'])->middleware('auth:sanctum');
-//Route::get('/countworkscreated', [WorkController::class, 'GetNumberOfWorks'])->middleware('auth:sanctum');
-//Route::get('/countstandingworks', [WorkController::class, 'GetNumberOfStandingWorks'])->middleware('auth:sanctum');
-

@@ -34,13 +34,10 @@ class SuperAdminController
                     'approved' => (bool)$user->approved,
                 ];
             });
-
-//            return response()->json(['success' => true, 'message' => 'Users fetched successfully', 'data' => $users]);
             return $this->success(trans('messages.superadmin.users_found'), $users);
         }
         else {
             return $this->error(trans('messages.superadmin.no_users_found'), null);
-//            return response()->json(['success' => false, 'message' => 'Not Authorized', 'data' => null], 401);
         }
     }
 
@@ -49,11 +46,16 @@ class SuperAdminController
         try{
             // Retrieve the user by their ID
             $user = User::find($userId);
-            $previousRole = $user->role_id;
 
             // Check if the user exists
             if (!$user) {
                 return $this->error(trans('messages.superadmin.failure_approve'), null);
+            }
+
+            // Check if the user is already approved
+            $previousRole = $user->role_id;
+            if ($user->role_id != 5) {
+                return $this->error(trans('messages.superadmin.role_validation_failure_approve'), null);
             }
 
             if ($request->has('approved')) {
@@ -66,8 +68,6 @@ class SuperAdminController
                 try {
                     if($previousRole == 5)
                         $user->notify(new UserApprovedNotification($user));
-                    if($previousRole != $user->role_id && $previousRole != 5)
-                        $user->notify(new UserRoleChangedNotification($user));
                 }
                 catch (\Exception $e) {
                     Log::error($this->error(trans('messages.superadmin.failure_notification_email'), $e->getMessage()));
@@ -103,5 +103,46 @@ class SuperAdminController
         else {
             return $this->error(trans('messages.superadmin.failure_disapprove'), null);
         }
+    }
+
+    public function changeRole(Request $request, int $userId)
+    {
+        try{
+            // Retrieve the user by their ID
+            $user = User::find($userId);
+
+            // Check if the user exists
+            if (!$user) {
+                return $this->error(trans('messages.superadmin.failure_approve'), null);
+            }
+
+            // Check if the user is not approved first
+            $previousRole = $user->role_id;
+            if ($user->role_id == 5) {
+                return $this->error(trans('messages.superadmin.role_validation_failure_disapprove'), null);
+            }
+
+            if ($request->has('approved')) {
+                if ($request->has('role_id')) {
+                    $user->role_id = $request->input('role_id');
+                    $user->approved = true;
+                    $user->save();
+                }
+
+                try {
+                    if($previousRole != $user->role_id && $previousRole != 5)
+                        $user->notify(new UserRoleChangedNotification($user));
+                }
+                catch (\Exception $e) {
+                    Log::error($this->error(trans('messages.superadmin.failure_notification_email'), $e->getMessage()));
+                }
+                return $this->success(trans('messages.superadmin.change'), null);
+            }
+            return $this->error(trans('messages.errors.invalid_request'), null);
+        }
+        catch (\Exception $e) {
+            return $this->error(trans('messages.server_error'), $e);
+        }
+
     }
 }
