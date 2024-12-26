@@ -32,8 +32,10 @@ class BillingController extends BaseController
     public function download($id)
     {
         try{
-//            $bill = Billing::find($id);
-//            $bill = Billing::where('billing_number', $id)->first();
+            if (Auth::user()->role_id != 4 || Auth::user()->role_id != 2) {
+                return $this->error(trans('messages.auth.unauthorized'), null);
+            }
+
             $bill = Billing::where('id', $id)->first();
 
             if (!$bill) {
@@ -158,7 +160,7 @@ class BillingController extends BaseController
             return $this->error(__('messages.server_error'), null);
         }
     }
-    public function getAllUserBillings()
+    public function getBillings()
     {
         try{
             $userId = auth()->id();
@@ -296,7 +298,7 @@ class BillingController extends BaseController
         try{
 
             // Get all the billings ordered by the latest
-            $perpage = 25;
+            $perpage = 10;
             $billings = Billing::latest('created_at')
                 ->paginate($perpage); // Paginate the results
 

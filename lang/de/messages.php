@@ -19,11 +19,14 @@ return [
         'no_permission' => 'Keine Berechtigung.',
         'approved' => 'Benutzer wurde erfolgreich aktiviert.',
         'failure_approve' => 'Benutzer konnte nicht aktiviert werden.',
+        'role_validation_failure_approve' => 'Der Benutzer ist bereits aktiviert.',
         'failure_notification_email' => 'Email konnte nicht gesendet werden.',
         'disapproved' => 'Benutzer wurde erfolgreich deaktiviert.',
         'failure_disapprove' => 'Benutzer konnte nicht deaktiviert werden.',
+        'role_validation_failure_disapprove' => 'Der Benutzer ist nicht aktiviert, bitte aktivieren Sie ihn zuerst, um die Rolle zu ändern.',
         'users_found' => 'Benutzer gefunden.',
         'no_users_found' => 'Keine Benutzer gefunden.',
+        'change' => 'Der Benutzer wurde erfolgreich geändert.',
     ],
     'auth' => [
         'register' => [
@@ -43,6 +46,7 @@ return [
         'unauthorized' => 'Nicht autorisiert.',
         'superadmin_required' => 'Superadmin-Rechte erforderlich.',
         'admin_required' => 'Admin-Rechte erforderlich.',
+        'honorar_required' => 'Honorarkraft-Rechte erforderlich.',
     ],
     'validation' => [
         'email' => [

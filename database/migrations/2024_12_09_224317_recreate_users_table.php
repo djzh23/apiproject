@@ -23,13 +23,13 @@ return new class extends Migration
             $table->boolean('approved')->default(false);
             $table->text('steueridentifikationsnummer')->nullable();
             $table->text('street')->nullable();
-            $table->integer('number')->nullable();
+            $table->integer('number')->nullable(); // string
             $table->text('pzl')->nullable();
             $table->text('city')->nullable();
             $table->text('country')->nullable();
             $table->text('bank_name')->nullable();
             $table->text('iban')->nullable();
-            $table->integer('bic')->nullable();
+            $table->integer('bic')->nullable(); // string
             $table->string('password');
             $table->rememberToken();
             $table->timestamp('email_verified_at')->nullable();

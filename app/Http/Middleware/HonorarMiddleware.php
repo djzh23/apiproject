@@ -8,9 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class SuperAdminMiddleware
+class HonorarMiddleware
 {
     use ApiResponses;
+
     /**
      * Handle an incoming request.
      *
@@ -18,9 +19,10 @@ class SuperAdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || Auth::user()->role_id != 1) {
-            return $this->error(trans('messages.auth.superadmin_required'), null);
+        if (!Auth::check() || Auth::user()->role_id != 4) {
+            return $this->error(trans('messages.auth.honorar_required'), null);
         }
+
         return $next($request);
     }
 }
