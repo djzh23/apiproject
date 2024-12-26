@@ -43,14 +43,14 @@ class AuthController extends BaseController
                     'required',
                     new StrictEmailRule,
                     new StringLengthRule(),
-                    'unique:users,email'  // Prüft auf Einzigartigkeit in der users-Tabelle
+                    'unique:users,email'  // Checks for uniqueness in the users table
                 ],
                 'password' => ['required', 'string' , new PasswordRule()],
                 'steueridentifikationsnummer' => ['required', new SteueridentifikationsnummerRule()],
                 'street' => ['required', 'string' , new StringLengthRule()],
                 'bank_name' => 'required|string',
                 'bic' => ['required', new BicRule()],
-                'iban' => ['required', new ValidIban()], // modify the validation error in vendors folder (readonly issue)
+                'iban' => ['required', new ValidIban()],
                 'role_id' => 'nullable|exists:roles,id',
             ]);
 
@@ -58,7 +58,7 @@ class AuthController extends BaseController
                 $errors = $validator->errors()->all();
                 $errorMessage = implode(' ', $errors);
 
-                // Nutze die Übersetzungen
+                // Get error message from long/de/passwords.php via trans() or “__”
                 if (str_contains($errorMessage, 'email has already been taken')) {
                     return $this->error(__('messages.user.email.exists'), null);
                 }
@@ -81,7 +81,7 @@ class AuthController extends BaseController
                     "bank_name" => $request->input("bank_name"),
                     "iban" => $request->input("iban"),
                     "bic" => $request->input("bic"),
-                    'role_id' => 5,
+                    'role_id' => 5, // NoRole
                     'approved' => false, // Not approved initially
                 ]);
 
@@ -116,7 +116,6 @@ class AuthController extends BaseController
 
             // Validate user existence
             if (!User::where('email', $request->input('email'))->exists()) {
-//                return $this->error('Invalid email', null);
                 return $this->error(__('messages.validation.email.not_found'), null);
             }
 
@@ -139,8 +138,6 @@ class AuthController extends BaseController
                 return $this->error(__('messages.user.no_role'), null);
             }
 
-
-
             // Attempt to log in the user
             if (Auth::attempt($request->only('email', 'password'))) {
                 $user = Auth::user(); // Get the authenticated user
@@ -156,7 +153,6 @@ class AuthController extends BaseController
                     5 => 'NoRole'
                 ];
 
-//                $roleName = $roles[$roleId] ?? 'Unknown';
                 $roleName = $roles[$roleId];
                 return $this->success(__('messages.auth.login.success'),  [
                     'user' =>  $user->toArray(),
@@ -203,7 +199,7 @@ class AuthController extends BaseController
                 return $this->success('Link zum Zurücksetzen des Passworts wurde per E-Mail gesendet', null);
             }
 
-            // Fehlermeldung aus lang/de/passwords.php via trans() holen
+
             throw ValidationException::withMessages([
                 'email' => [trans($status)],
             ]);

@@ -20,7 +20,7 @@ class SuperAdminController
     {
         $user_role = Auth::user()->role_id;
 
-        if ($user_role == 1) { // Assuming 1 is the role ID for Superadmin
+        if ($user_role == 1) {
             $users = User::all()->map(function ($user) {
                 return [
                     'id' => $user->id,
@@ -72,6 +72,7 @@ class SuperAdminController
                 catch (\Exception $e) {
                     Log::error($this->error(trans('messages.superadmin.failure_notification_email'), $e->getMessage()));
                 }
+
                 return $this->success(trans('messages.superadmin.approved'), null);
             }
             return $this->error(trans('messages.errors.invalid_request'), null);

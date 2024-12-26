@@ -23,9 +23,6 @@ class BillingController extends BaseController
     }
     public function initializeDirectories(): void
     {
-        // Create a directory in storage/app
-//        Storage::makeDirectory('app/bills-directory');
-
         // Create a directory in public (which is linked to storage/app/public)
         Storage::disk('public')->makeDirectory('billings-pdfs');
     }
@@ -118,11 +115,10 @@ class BillingController extends BaseController
     public function storeBillPdf(Request $request, $id): JsonResponse
     {
         try{
-//            $bill = Billing::find($id)->where('user_id', auth()->id())->all();
             $bill = Billing::where('id', $id)
                 ->where('user_id', auth()->id())
                 ->first();
-//            $bill = Billing::find($id)->where('user_id', auth()->id())->first();
+
             Log::info("storeBillPdf function error-server: $bill");
             if (!$bill) {
                 return $this->error(__('messages.billing.pdf.upload.failed'), null);
@@ -143,7 +139,6 @@ class BillingController extends BaseController
             $month = $bill->month;
             $string = 'rechnung';
             $number = $bill->billing_number;
-//            $filename = "{$date}-{$month}-{$string}-{$number}.pdf";
             $filename = "{$string}-{$number}-{$month}-{$user_name}-{$date}.pdf";
 
             // Store the uploaded pdf file with the custom filename and get its path
