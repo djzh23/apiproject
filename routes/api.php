@@ -45,7 +45,7 @@ Route::middleware(['auth:sanctum', 'honorar'])->group(function () {
 });
 
 // Billings API routes authorized to both honorar and admin
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum','admin_and_honrar'])->group(function () {
     Route::get('/billings/download/{id}', [BillingController::class, 'download'])
         ->name('pdf.downloadBillings')
         ->middleware('throttle:60,1');
