@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AdminAndHonorarMiddleware;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\HonorarMiddleware;
 use App\Http\Middleware\SuperAdminMiddleware;
@@ -19,14 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'superadmin' => SuperAdminMiddleware::class,
             'admin' => AdminMiddleware::class,
-            'honorar' => HonorarMiddleware::class
+            'honorar' => HonorarMiddleware::class,
+            'admin_and_honorar' => AdminAndHonorarMiddleware::class
         ]);
-
-        $middleware->group('honorar_admin', [
-            'admin' => AdminMiddleware::class,
-            'honorar' => HonorarMiddleware::class
-        ]);
-
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
