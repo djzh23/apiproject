@@ -29,10 +29,6 @@ class BillingController extends BaseController
     public function download($id)
     {
         try{
-            if (Auth::user()->role_id != 4 || Auth::user()->role_id != 2) {
-                return $this->error(trans('messages.auth.unauthorized'), null);
-            }
-
             $bill = Billing::where('id', $id)->first();
 
             if (!$bill) {
