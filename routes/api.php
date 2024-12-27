@@ -20,7 +20,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'getProfile']);
 });
 
-
 // super admin routes
 Route::middleware(['auth:sanctum', 'superadmin'])->group(function () {
     Route::put('/approve/{userId}', [SuperAdminController::class, 'approve']);
@@ -29,23 +28,20 @@ Route::middleware(['auth:sanctum', 'superadmin'])->group(function () {
     Route::get('/users', [SuperAdminController::class, 'getAllUsers']);
 });
 
-// to be deleted, not used in front end
-Route::get('billings/pdfs', [BillingController::class, 'listOfBillsPdfs'])->middleware('auth:sanctum');
+// Billings API routes authorized to admin only
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::get('/billings/allusers', [BillingController::class, 'getAdminAllBillings']);
+    Route::get('/billings/allusers/{month}', [BillingController::class, 'getAdminBillsByMonth']);
+});
 
 // Billings API routes authorized to honorar only
 Route::middleware(['auth:sanctum', 'honorar'])->group(function () {
-    Route::post('/billings/create', [BillingController::class, 'store'])->middleware('honorar');
-    Route::post('/billings/preview', [BillingController::class, 'preview'])->middleware('honorar');
-    Route::post('/billings/{id}/pdf', [BillingController::class, 'storeBillPdf'])->middleware('honorar');
-    Route::get('/billings', [BillingController::class, 'getBillings'])->middleware('honorar');
-    Route::get('/billings/{month}', [BillingController::class, 'getBillsByMonth'])->middleware('honorar');
+    Route::post('/billings/create', [BillingController::class, 'store']);
+    Route::post('/billings/preview', [BillingController::class, 'preview']);
+    Route::post('/billings/{id}/pdf', [BillingController::class, 'storeBillPdf']);
+    Route::get('/billings', [BillingController::class, 'getBillings']);
+    Route::get('/billings/{month}', [BillingController::class, 'getBillsByMonth']);
     Route::get('/billings/count/created', [BillingController::class, 'getNumberOfBills']);
-});
-
-// Billings API routes authorized to admin only
-Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-    Route::get('/billings/allusers', [BillingController::class, 'getAdminAllBillings'])->middleware('admin');
-    Route::get('/billings/allusers/{month}', [BillingController::class, 'getAdminBillsByMonth'])->middleware('admin');
 });
 
 // Billings API routes authorized to both honorar and admin
