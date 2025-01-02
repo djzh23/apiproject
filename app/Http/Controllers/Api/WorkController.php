@@ -62,8 +62,8 @@ class WorkController
                 ]);
             }
             catch (\Exception $e) {
-                Log::error("preview() function error-server: $e");
-                return $this->error(trans('messages.work.create.unique_work_validation_failed'), null);
+                Log::error("creatework() function error-server: $e");
+                return $this->error(trans('messages.work.unique_work_validation_failed'), null);
             }
 
             // If validation passes, get the validated data
@@ -95,8 +95,8 @@ class WorkController
             // Get only the Works that belong to the authenticated user and filtered by status
             $perpage = 10;
             $works = Work::where('creator_id', $userId)
-                ->with('ageGroups') // Eager load the ageGroups relationship
-                ->orderByRaw("CASE WHEN status = 'standing' THEN 0 ELSE 1 END, updated_at DESC")
+                ->with('ageGroups') // load the ageGroups relationship
+                ->orderByRaw("CASE WHEN status = 'standing' THEN 0  WHEN status = 'inprogress' THEN 1 ELSE 2 END, updated_at DESC")
                 ->paginate($perpage); // Change '10' to however many works per page you want
 
 
@@ -194,6 +194,23 @@ class WorkController
                 return $this->error(__('messages.work.update.validation_failed'), $validator->errors());
             }
 
+            try{
+                $request->validate([
+                    'date' => [
+                        'required',
+                        'date_format:d-m-Y,Y-m-d',
+                        Rule::unique('works')
+                            ->where(function ($query) use ($request) {
+                                return $query->where('team', $request->team);
+                            })->ignore($id) // This ignores the current work
+                    ],
+                ]);
+            }
+            catch (\Exception $e) {
+                Log::error("updateWork() function error-server: $e");
+                return $this->error(trans('messages.work.unique_work_validation_failed'), null);
+            }
+
             // If validation passes, get the validated data
             $validatedData = $validator->validated();
 
@@ -273,6 +290,22 @@ class WorkController
             if ($validator->fails()) {
                 Log::error('Complete Work validation failed: ' . $validator->errors());
                 return $this->error(__('messages.work.complete.validation_failed'), $validator->errors());
+            }
+
+            try{
+                Validator::make($data, [
+                    'date' => [
+                        'required',
+                        'date_format:d-m-Y,Y-m-d',
+                        Rule::unique('works')->where(function ($query) use ($data) {
+                            return $query->where('team', $data['team']);
+                        })->ignore($id)
+                    ],
+                ])->validate();
+            }
+            catch (\Exception $e) {
+                Log::error("updateWork() function error-server: $e");
+                return $this->error(trans('messages.work.unique_work_validation_failed'), null);
             }
 
             // If validation passes, get the validated data
