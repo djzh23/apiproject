@@ -78,8 +78,6 @@ return [
         'preview' => [
             'success' => 'Preview war erfolgreich.',
             'failed' => 'Preview war nicht erfolgreich, bitte prüfen Sie nochmal die Eingaben.',
-            'validation_failed' => 'Die Validierung hat fehlgeschlagen, bitte die Eingabe prüfen .',
-            'invalid' => 'Ungültige Rechnungsnummer oder Rechnungsnummer ist bereits vergeben.'
         ],
         'fetch' => [
             'success' => 'Rechnung erfolgreich abgerufen.',
@@ -89,6 +87,8 @@ return [
         'create' => [
             'success' => 'Rechnung erfolgreich erstellt.',
             'failed' => 'Rechnung konnte nicht erstellt werden.',
+            'validation_failed' => 'Die Validierung hat fehlgeschlagen, bitte die Eingabe prüfen .',
+            'invalid' => 'Ungültige Rechnungsnummer oder Rechnungsnummer ist bereits vergeben.'
         ],
         'pdf' => [
             'upload' => [
@@ -121,11 +121,12 @@ return [
         ],
     ],
     'work' =>[
+
+        'unique_work_validation_failed' => 'Für dieses Datum ist bereits ein Einsatz mit demselben Team gespeichert. Bitte prüfen Sie die Eingaben.',
         'create' => [
             'success' => 'Einsatzt erfolgreich erstellt.',
             'failed' => 'Einsatz konnte nicht erstellt werden.',
             'validation_failed' => 'Die Validierung hat fehlgeschlagen, bitte die Eingabe prüfen .',
-            'unique_work_validation_failed' => 'Für dieses Datum ist bereits ein Einsatz mit demselben Team gespeichert. Bitte prüfen Sie die Eingaben.',
         ],
         'fetch' => [
             'success' => 'Einsätze wurden erfolgreich geladen.',
