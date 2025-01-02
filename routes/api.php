@@ -37,7 +37,6 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 // Billings API routes authorized to honorar only
 Route::middleware(['auth:sanctum', 'honorar'])->group(function () {
     Route::post('/billings/create', [BillingController::class, 'store']);
-    Route::post('/billings/preview', [BillingController::class, 'preview']);
     Route::post('/billings/{id}/pdf', [BillingController::class, 'storeBillPdf']);
     Route::get('/billings', [BillingController::class, 'getBillings']);
     Route::get('/billings/{month}', [BillingController::class, 'getBillsByMonth']);
