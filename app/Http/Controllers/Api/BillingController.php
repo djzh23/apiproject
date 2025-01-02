@@ -51,25 +51,6 @@ class BillingController extends BaseController
     public function store(Request $request): JsonResponse
     {
         try {
-            $billing = new Billing([
-                'user_id' => $request->user()->id,
-                'date' => $request->date,
-                'month' => $request->month,
-                'billing_number' => $request->billing_number,
-                'billing_details' => $request->billing_details,
-                'somme_all' => $request->somme_all,
-
-            ]);
-            $billing->save();
-            return $this->success(trans('messages.billing.create.success'), $billing);
-        } catch (\Exception $e) {
-            Log::error("store() function error-server: $e");
-            return $this->error(__('messages.billing.create.failed'), null);
-        }
-    }
-    public function preview(Request $request): JsonResponse
-    {
-        try {
             $userId = auth()->id();
 
             $validatedData = $request->validate([
@@ -81,7 +62,7 @@ class BillingController extends BaseController
             ]);
 
             if(!$validatedData){
-                return $this->error(trans('messages.billing.preview.validation_failed'), null);
+                return $this->error(trans('messages.billing.create.validation_failed'), null);
             }
 
             try{
@@ -95,17 +76,23 @@ class BillingController extends BaseController
                 ]);
             }
             catch (\Exception $e) {
-                Log::error("preview() function error-server: $e");
-                return $this->error(trans('messages.billing.preview.invalid'), null);
+                Log::error("store() function error-server: $e");
+                return $this->error(trans('messages.billing.create.invalid'), null);
             }
 
-            $billing = new Billing($validatedData);
-
-            return $this->success(trans('messages.billing.preview.success'), $billing);
-
-        } catch (ValidationException $e) {
-            Log::error("preview() function error-server: $e");
-            return $this->error(trans('messages.billing.preview.failed'), $e->getTraceAsString());
+            $billing = new Billing([
+                'user_id' => $request->user()->id,
+                'date' => $request->date,
+                'month' => $request->month,
+                'billing_number' => $request->billing_number,
+                'billing_details' => $request->billing_details,
+                'somme_all' => $request->somme_all,
+            ]);
+            $billing->save();
+            return $this->success(trans('messages.billing.create.success'), $billing);
+        } catch (\Exception $e) {
+            Log::error("store() function error-server: $e");
+            return $this->error(__('messages.billing.create.failed'), null);
         }
     }
     public function storeBillPdf(Request $request, $id): JsonResponse
@@ -114,8 +101,6 @@ class BillingController extends BaseController
             $bill = Billing::where('id', $id)
                 ->where('user_id', auth()->id())
                 ->first();
-
-            Log::info("storeBillPdf function error-server: $bill");
             if (!$bill) {
                 return $this->error(__('messages.billing.pdf.upload.failed'), null);
             }
@@ -246,28 +231,6 @@ class BillingController extends BaseController
             return $this->error(trans('messages.billing.pdf.month_pagination.failed'), null);
         }
 
-    }
-    public function listOfBillsPdfs(Request $request)
-    {
-        try{
-            $userId = $request->user()->id;
-
-            $bills = Billing::where('user_id', $userId)->whereNotNull('pdf_file')
-                ->latest('created_at')
-                ->get();
-
-            if ($bills->isEmpty()) {
-                return $this->error(trans('messages.billing.pdf.list.error'), null);
-            }
-
-            $files = $bills->pluck('pdf_file')->all();
-
-            return $this->success(trans('messages.billing.pdf.list.success'), $files);
-        }
-        catch (\Exception $e) {
-            Log::error("listOfBillsPdfs function error-server: $e");
-            return $this->error(__('messages.server_error'), null);
-        }
     }
     public function getNumberOfBills()
     {
