@@ -14,7 +14,7 @@ class DashboardController extends BaseController
 
         return view('dashboard', [
             'user' => $user,
-            // Weitere Daten hier
+            // ...
         ]);
     }
 }
