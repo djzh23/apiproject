@@ -5,7 +5,8 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
-use Propaganistas\LaravelPhone\PhoneNumber;
+use Propaganistas\LaravelPhone\PhoneNumber; // Propaganistas. „Propaganistas/Laravel-Phone“. PHP, 7. Januar 2025. https://github.com/Propaganistas/Laravel-Phone.
+
 
 
 class PhoneRule implements ValidationRule
@@ -20,7 +21,7 @@ class PhoneRule implements ValidationRule
         // Use the PhoneNumber class from Laravel-Phone to validate the phone number
         $phone = new PhoneNumber($value);
 
-        // Check if the phone number is valid (e.g., not empty and matches a known format)
+        // Check if the phone number is valid (e.g not empty and matches a known format)
         if (!$phone->isValid()) {
             $attribute_de = AttributeHelper::get($attribute);
             $fail(
