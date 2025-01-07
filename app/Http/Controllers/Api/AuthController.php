@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Nembie\IbanRule\ValidIban;
+use Nembie\IbanRule\ValidIban; //// Pacitto, Luca. „Nembie/iban-rule“. PHP, 18. November 2024. https://github.com/Nembie/iban-rule.
 
 class AuthController extends BaseController
 {
