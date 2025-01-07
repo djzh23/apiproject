@@ -146,10 +146,10 @@ class AuthController extends BaseController
 
                 // roles and their responses
                 $roles = [
-                    1 => 'Superadmin',
-                    2 => 'Admin',
-                    3 => 'UserFest',
-                    4 => 'UserHoni',
+                    1 => 'Superadmin', // IT-Administrator
+                    2 => 'Admin', // Projekt-Koordinator
+                    3 => 'UserFest', // Festmitarbeiter
+                    4 => 'UserHoni', // Honorarkraft
                     5 => 'NoRole'
                 ];
 
