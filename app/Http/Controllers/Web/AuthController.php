@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+// This implementation in the Web folder was created to demonstrate the compatibility of the PPM API with a web-based variation.
 class AuthController extends BaseController
 {
     public function __construct()
@@ -104,31 +105,6 @@ class AuthController extends BaseController
         return view('auth.reset-password', ['token' => $token, 'email' => $request->email]);
     }
 
-//    public function resetPassword(Request $request)
-//    {
-//        $request->validate([
-//            'token' => 'required',
-//            'email' => 'required|email',
-//            'password' => 'required|min:8|confirmed',
-//        ]);
-//
-//        $status = Password::reset(
-//            $request->only('email', 'password', 'password_confirmation', 'token'),
-//            function ($user, $password) {
-//                $user->forceFill([
-//                    'password' => Hash::make($password)
-//                ])->setRememberToken(Str::random(60));
-//
-//                $user->save();
-//
-//                event(new PasswordReset($user));
-//            }
-//        );
-//
-//        return $status === Password::PASSWORD_RESET
-//            ? redirect()->route('login')->with('status', __($status))
-//            : back()->withErrors(['email' => __($status)]);
-//    }
 
     public function resetPassword(Request $request)
     {
@@ -151,7 +127,6 @@ class AuthController extends BaseController
             }
         );
 
-        // Hier die Änderung: redirect()->route('home') statt 'login'
         return $status === Password::PASSWORD_RESET
             ? redirect()->route('home')->with('status', 'Your password has been reset successfully!')
             : back()->withErrors(['email' => __($status)]);
