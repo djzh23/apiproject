@@ -120,7 +120,7 @@ class WorkController
                     'parent_contact' => $work->parent_contact,
                     'wellbeing_of_children' => $work->wellbeing_of_children,
                     'notes' => $work->notes,
-                    'wishes' => $work->wishes,
+                    'wishes' => $work->wishes, // Partzipation
                     'pdf_file' => $work->pdf_file,
                     'end_work' => $work->end_work,
                     'kids_data' => $work->ageGroups->map(function ($ageGroup) use ($work) {
