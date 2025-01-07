@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
+// This is the middleware implementation for only the Projekt-Koordinator role.
 class AdminMiddleware
 {
     use ApiResponses;
