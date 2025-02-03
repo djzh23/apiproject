@@ -120,7 +120,7 @@ class WorkController
                     'parent_contact' => $work->parent_contact,
                     'wellbeing_of_children' => $work->wellbeing_of_children,
                     'notes' => $work->notes,
-                    'wishes' => $work->wishes,
+                    'wishes' => $work->wishes, // Partzipation
                     'pdf_file' => $work->pdf_file,
                     'end_work' => $work->end_work,
                     'kids_data' => $work->ageGroups->map(function ($ageGroup) use ($work) {
@@ -217,7 +217,7 @@ class WorkController
             // Update the work with the validated data
             $work->update($validatedData);
 
-            // Update kids data in the pivot table if provided
+            // Update kids data in the pivot table "work_age_group" if provided
             if ($request->has('kids_data')) {
                 $kidsData = $request->input('kids_data');
                 $syncData = [];
@@ -266,7 +266,7 @@ class WorkController
                 throw new \Exception('Invalid JSON data: ' . json_last_error_msg());
             }
 
-            // Validate the incoming request data
+            // Validate the incoming request data, work validation
             $validator = Validator::make($data, [
                 'date' => 'required|date',
                 'start_work' => 'date_format:H:i',
@@ -522,7 +522,7 @@ class WorkController
     public function GetNumberOfIncompleteWorks(): JsonResponse
     {
         try {
-            $userId = Auth::id(); // Get the ID of the authenticated user
+            $userId = Auth::id(); 
 
             // Get only the Works that belong to the authenticated user
             $works = Work::where('creator_id', $userId)->whereIn('status', ['standing', 'inprogress'])->get();

@@ -11,11 +11,13 @@ class Work extends Model
 
     // Define constants for status values
     const STATUS_STANDING = 'standing';
+    const STATUS_INPROGRESS = 'inprogress';
     const STATUS_COMPLETE = 'complete';
 
     // Define an array of valid statuses
     const VALID_STATUSES = [
         self::STATUS_STANDING,
+        self::STATUS_INPROGRESS,
         self::STATUS_COMPLETE,
     ];
 
@@ -35,7 +37,7 @@ class Work extends Model
         'parent_contact',
         'wellbeing_of_children',
         'notes',
-        'wishes',
+        'wishes', // Partizipation
         'pdf_file',
         'updated_at',
         'pdf_file',
