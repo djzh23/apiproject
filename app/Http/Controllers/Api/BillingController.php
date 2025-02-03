@@ -253,8 +253,12 @@ class BillingController extends BaseController
 
             // Get all the billings ordered by the latest
             $perpage = 10;
-            $billings = Billing::latest('created_at')
-                ->paginate($perpage); // Paginate the results
+//            $billings = Billing::latest('created_at')
+//                ->paginate($perpage); // Paginate the results
+
+            $billings = Billing::with('user')  // Eager load the user relationship
+                ->latest('created_at')
+                ->paginate($perpage);
 
 
             // Transform the data to make it more readable
@@ -262,6 +266,7 @@ class BillingController extends BaseController
                 return [
                     'id' => $billing->id,
                     'billing_number' => $billing->billing_number,
+                    'billing_creator' => $billing->user ? $billing->user->firstname . ' ' . $billing->user->lastname : '',
                     'date' => $billing->date,
                     'month' => $billing->month,
                     'somme_all' => $billing->somme_all,
