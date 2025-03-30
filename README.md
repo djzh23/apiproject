@@ -34,7 +34,7 @@ A robust Laravel-based RESTful API for managing billing, work assignments, and u
 - **Framework:** Laravel 11.x
 - **PHP Version:** 8.2+
 - **Authentication:** Laravel Sanctum
-- **Database:** MySQL/PostgreSQL
+- **Database:** MySQL 
 - **API Documentation:** RESTful API
 - **Testing:** PHPUnit ( To do ) 
 
@@ -42,7 +42,7 @@ A robust Laravel-based RESTful API for managing billing, work assignments, and u
 
 1. Clone the repository
 ```bash
-git clone [your-repository-url]
+git clone 
 ```
 
 2. Install dependencies
